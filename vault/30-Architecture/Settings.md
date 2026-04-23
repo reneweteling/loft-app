@@ -35,7 +35,9 @@ Controls app-level behaviour that is not specific to any pane or AWS configurati
 |---|---|---|
 | Launch at login | Toggle | Registers / unregisters via `SMAppService.mainApp` |
 | Show in menu bar | Toggle | Always `true` for a menu bar app; controls whether the icon is visible when another full-screen app is active |
-| Notification sound | Toggle | Whether `UNNotificationContent.sound` is `.default` or `nil` |
+| Show system notifications | Toggle | Opt-in; flipping on prompts `UNUserNotificationCenter` for permission. Off by default — URLs are always copied to the clipboard regardless |
+| Notification sound | Toggle | Whether `UNNotificationContent.sound` is `.default` or `nil` (disabled until system notifications are on) |
+| Share anonymous crash reports and usage | Toggle | Opt-out; drives `AppConfig.analyticsEnabled`. Starts or stops the Sentry SDK in place via `Telemetry.startIfEnabled()`. See [[Telemetry]] for the full data contract |
 | History limit | Stepper (25–500) | Max records kept by `HistoryStore`; oldest trimmed when exceeded |
 
 Persistence: all General fields → `UserDefaults` under `com.weteling.loft` domain.
@@ -126,7 +128,7 @@ Read-only informational tab.
 | Region, bucket, endpoint | `UserDefaults` | `awsRegion`, `awsBucket`, `awsEndpoint` |
 | Force path-style | `UserDefaults` | `awsForcePathStyle` |
 | CDN base URL | `UserDefaults` | `cdnBaseURL` |
-| General toggles | `UserDefaults` | `notificationSound`, `historyLimit` |
+| General toggles | `UserDefaults` | `general.notificationSound`, `general.showSystemNotifications`, `general.analyticsEnabled`, `historyLimit` |
 | Upload history | JSON file on disk | `~/Library/Application Support/com.weteling.loft/history.json` |
 
 ## Related
@@ -134,6 +136,7 @@ Read-only informational tab.
 - [[Architecture Overview]]
 - [[Panes & TTLs]]
 - [[Upload Pipeline]]
+- [[Telemetry]]
 - [[File Layout]]
 - [[Glossary]]
 - [[Loft Overview]]

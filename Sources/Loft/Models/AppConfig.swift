@@ -12,6 +12,8 @@ final class AppConfig: ObservableObject {
     @AppStorage("cdn.baseURL") var cdnBaseURL: String = ""
     @AppStorage("general.launchAtLogin") var launchAtLogin: Bool = false
     @AppStorage("general.notificationSound") var notificationSound: Bool = true
+    @AppStorage("general.showSystemNotifications") var showSystemNotifications: Bool = false
+    @AppStorage("general.analyticsEnabled") var analyticsEnabled: Bool = true
 
     @Published var panes: [Pane] = Pane.defaults {
         didSet { persistPanes() }

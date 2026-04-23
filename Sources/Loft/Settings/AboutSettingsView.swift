@@ -2,10 +2,13 @@ import SwiftUI
 import AppKit
 
 struct AboutSettingsView: View {
+    @ObservedObject private var updates = UpdateChecker.shared
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 loftHeader
+                updatesRow
                 Divider().padding(.horizontal, 40)
                 builtByCard
                 Text("© \(Self.year) Felobo B.V.")
@@ -16,6 +19,59 @@ struct AboutSettingsView: View {
             .padding(.vertical, 24)
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity)
+        }
+        .task {
+            await updates.checkIfNeeded()
+        }
+    }
+
+    private var updatesRow: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 10) {
+                if updates.isChecking {
+                    ProgressView().controlSize(.small)
+                    Text("Checking for updates…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if updates.isUpdateAvailable, let latest = updates.latestVersion {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundStyle(.orange)
+                    Text("Update available: v\(latest)")
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                    Button("Download") {
+                        updates.openReleasesPage()
+                    }
+                    .controlSize(.small)
+                } else if updates.lastCheckedAt != nil {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("You're on the latest version")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Update status unknown")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+
+                Button {
+                    Task { await updates.forceCheck() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+                .disabled(updates.isChecking)
+                .help("Check for updates")
+            }
+
+            if let err = updates.lastCheckError {
+                Text(err)
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
         }
     }
 

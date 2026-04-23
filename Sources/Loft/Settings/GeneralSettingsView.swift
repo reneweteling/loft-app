@@ -21,8 +21,33 @@ struct GeneralSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Section("Privacy") {
+                Toggle("Share anonymous crash reports and usage", isOn: Binding(
+                    get: { config.analyticsEnabled },
+                    set: { newValue in
+                        config.analyticsEnabled = newValue
+                        Telemetry.startIfEnabled()
+                    }
+                ))
+                Text("Sends crash reports and aggregated usage counts (uploads per pane, file sizes) to Sentry. No file names, URLs, credentials, or personal data are transmitted. Toggle off to disable entirely.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Section("Notifications") {
+                Toggle("Show system notifications", isOn: Binding(
+                    get: { config.showSystemNotifications },
+                    set: { newValue in
+                        config.showSystemNotifications = newValue
+                        if newValue {
+                            Task { await NotificationManager.shared.requestAuthorizationIfOptedIn() }
+                        }
+                    }
+                ))
                 Toggle("Play sound on upload", isOn: $config.notificationSound)
+                    .disabled(!config.showSystemNotifications)
+                Text("Upload URLs are always copied to the clipboard. System notifications are optional — macOS will ask permission the first time you enable them.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
