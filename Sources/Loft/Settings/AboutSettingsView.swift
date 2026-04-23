@@ -50,9 +50,10 @@ struct AboutSettingsView: View {
             if let logo = Self.weterlingLogo {
                 Image(nsImage: logo)
                     .resizable()
+                    .renderingMode(.template)
                     .scaledToFit()
                     .frame(height: 72)
-                    .colorInvertedIfDark()
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 16)
             }
 
@@ -101,32 +102,20 @@ struct AboutSettingsView: View {
         return f.string(from: Date())
     }
 
-    static var weterlingLogo: NSImage? {
+    static let weterlingLogo: NSImage? = {
         guard let url = Bundle.module.url(forResource: "weteling-logo", withExtension: "svg"),
               let image = NSImage(contentsOf: url) else {
             return nil
         }
+        let intrinsic = image.size
+        if intrinsic.width > 0, intrinsic.height > 0 {
+            let targetHeight: CGFloat = 144
+            let scale = targetHeight / intrinsic.height
+            image.size = NSSize(width: intrinsic.width * scale, height: targetHeight)
+        }
         image.isTemplate = true
         return image
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func colorInvertedIfDark() -> some View {
-        modifier(DarkInvertModifier())
-    }
-}
-
-private struct DarkInvertModifier: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
-    func body(content: Content) -> some View {
-        if colorScheme == .dark {
-            content.colorInvert()
-        } else {
-            content
-        }
-    }
+    }()
 }
 
 private struct PillLinkButton: View {
