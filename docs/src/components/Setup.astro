@@ -1,0 +1,97 @@
+---
+const vaultUrl = 'https://github.com/reneweteling/loft-app/tree/main/vault/20-Setup';
+const readmeUrl = 'https://github.com/reneweteling/loft-app#readme';
+---
+
+<section id="setup">
+  <div class="section-inner">
+    <p class="section-label">Setup</p>
+    <h2 class="section-heading">Ready in minutes.</h2>
+
+    <div class="setup-card">
+      <!-- Left accent stripe -->
+      <div class="stripe" aria-hidden="true"></div>
+
+      <div class="card-content">
+        <p>
+          You need an S3 bucket with lifecycle rules for the TTL panes, and a narrow IAM policy
+          scoped to that bucket. The setup guides walk through everything — bucket creation,
+          lifecycle rules, CORS, and the exact policy JSON.
+        </p>
+
+        <div class="link-row">
+          <a class="btn-outline" href={vaultUrl} target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 1h6v6M13 1 6 8M4 3H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-2"/>
+            </svg>
+            Setup guide
+          </a>
+          <a class="btn-outline btn-dim" href={readmeUrl} target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="1" y="1" width="12" height="12" rx="2"/>
+              <path d="M4 4h6M4 7h6M4 10h4"/>
+            </svg>
+            README on GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    position: relative;
+  }
+
+  .setup-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .stripe {
+    width: 4px;
+    flex-shrink: 0;
+    background: linear-gradient(to bottom, var(--teal), var(--mid-blue));
+  }
+
+  .card-content {
+    padding: 2rem 2rem 2rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .card-content p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  .link-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-dim {
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn-dim:hover {
+    background: var(--border);
+    color: var(--text);
+  }
+</style>

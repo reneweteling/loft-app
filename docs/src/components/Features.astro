@@ -1,0 +1,116 @@
+---
+const features = [
+  {
+    title: 'Drag & Drop',
+    desc: 'Drop any file or folder onto the menu bar popover. Folders are zipped automatically before upload.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11 2v12m0 0l-4-4m4 4 4-4"/>
+      <path d="M3 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+    </svg>`,
+  },
+  {
+    title: 'Four TTL Panes',
+    desc: 'Private, 1 Day, 30 Days, Public. TTL panes use S3 lifecycle tags so files expire without cleanup scripts.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="9"/>
+      <path d="M11 6v5l3 3"/>
+    </svg>`,
+  },
+  {
+    title: 'Fast Multipart',
+    desc: 'Files above 5 MB switch to multipart upload automatically — 8 MB chunks, 4 concurrent parts.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M13 2L3 13h8l-2 7 10-11h-8l2-7z"/>
+    </svg>`,
+  },
+  {
+    title: 'Any S3 Endpoint',
+    desc: 'Works with AWS, Cloudflare R2, Backblaze B2, MinIO, and DigitalOcean Spaces via a custom endpoint field.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 16.5a3.5 3.5 0 01-3.5 3.5h-11A3.5 3.5 0 012 16.5V9a7 7 0 0114 0v1"/>
+      <path d="M16 10h4m-2-2v4"/>
+    </svg>`,
+  },
+];
+---
+
+<section id="features">
+  <div class="section-inner">
+    <p class="section-label">Features</p>
+    <h2 class="section-heading">Everything you need, nothing you don't.</h2>
+    <div class="features-grid">
+      {features.map((f) => (
+        <div class="feature-tile">
+          <div class="icon-wrap" set:html={f.icon} />
+          <h3>{f.title}</h3>
+          <p>{f.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .feature-tile {
+    background: var(--surface);
+    /* Inner border trick: gradient border via box-shadow + background-clip */
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .feature-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .feature-tile:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-hi);
+  }
+
+  .icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(30, 58, 138, 0.15));
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--teal);
+    flex-shrink: 0;
+  }
+
+  .feature-tile h3 {
+    font-size: 1rem;
+    font-weight: 650;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .feature-tile p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+</style>

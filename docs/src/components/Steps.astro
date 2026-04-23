@@ -1,0 +1,102 @@
+---
+const steps = [
+  {
+    title: 'Drag your file',
+    desc: 'Click the Loft icon in the menu bar to reveal the popover, then drag any file or folder from Finder onto it.',
+  },
+  {
+    title: 'Drop on a pane',
+    desc: 'Choose how long the link should live — Private, 1 Day, 30 Days, or Public — and release the file.',
+  },
+  {
+    title: 'URL is copied',
+    desc: 'Upload completes, a system notification appears, and the shareable URL lands on your clipboard automatically.',
+  },
+];
+---
+
+<section id="how-it-works">
+  <div class="section-inner">
+    <p class="section-label">How it works</p>
+    <h2 class="section-heading">Three steps, zero friction.</h2>
+
+    <div class="steps">
+      {steps.map((step, i) => (
+        <div class="step">
+          <div class="step-number" aria-hidden="true">{i + 1}</div>
+          <div class="step-body">
+            <h3>{step.title}</h3>
+            <p>{step.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 2.5rem;
+  }
+
+  /* Vertical connector line between steps */
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 1.25rem; /* half of step-number width (2.5rem / 2) */
+    top: 2.5rem;   /* below the circle */
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(14, 165, 233, 0.3), transparent);
+  }
+
+  .step:last-child {
+    padding-bottom: 0;
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--mid-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 16px rgba(14, 165, 233, 0.25);
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body {
+    padding-top: 0.3rem;
+  }
+
+  .step-body h3 {
+    font-size: 1.05rem;
+    font-weight: 650;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .step-body p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    max-width: 520px;
+  }
+</style>

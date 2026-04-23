@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import Steps from '../components/Steps.astro';
+import Setup from '../components/Setup.astro';
+import Footer from '../components/Footer.astro';
+
+const title = 'Loft — macOS menu bar S3 uploader';
+const description = 'Loft is a native macOS menu-bar app that uploads files to S3 with a single drag. Four TTL panes, multipart upload, custom endpoints — AWS, R2, B2, MinIO.';
+const ogImage = 'https://reneweteling.github.io/loft-app/og.png';
+const canonical = 'https://reneweteling.github.io/loft-app/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Loft" />
+    <meta property="og:description" content="Drag a file to your menu bar. Get a link back." />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Loft" />
+    <meta name="twitter:description" content="Drag a file to your menu bar. Get a link back." />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" type="image/svg+xml" href="/loft-app/favicon.svg" />
+  </head>
+  <body>
+    <Hero />
+    <Features />
+    <hr class="divider" />
+    <Steps />
+    <hr class="divider" />
+    <Setup />
+    <hr class="divider" />
+    <Footer />
+  </body>
+</html>

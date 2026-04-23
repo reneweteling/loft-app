@@ -1,0 +1,202 @@
+{
+  "main": {
+    "id": "633338346ed2f3c7",
+    "type": "split",
+    "children": [
+      {
+        "id": "29465b2fdc9d34e3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "59e38c36ad1315c6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "10-Assets/Image Prompts.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Image Prompts"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1af9c7665599996a",
+    "type": "split",
+    "children": [
+      {
+        "id": "bde871864d6935d1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "549c768a94f6fc06",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "daca3ae1abcc5e49",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "fe8dc1b80e7a9c95",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6786b616c126290c",
+    "type": "split",
+    "children": [
+      {
+        "id": "42bd047f89cc7b08",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0b8262101b0ff902",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "10-Assets/Image Prompts.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Image Prompts"
+            }
+          },
+          {
+            "id": "a483e5cb855863dc",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "10-Assets/Image Prompts.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Image Prompts"
+            }
+          },
+          {
+            "id": "8e673ea303cc084a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "ae9b7f9bd9fb89a9",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "4bc1eca0b14c7782",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "10-Assets/Image Prompts.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Image Prompts"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "markdown-importer:Open format converter": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "59e38c36ad1315c6",
+  "lastOpenFiles": [
+    "00-Index/Loft Overview.md",
+    "10-Assets/Asset Inventory.md",
+    "30-Architecture/File Layout.md",
+    "30-Architecture/Architecture Overview.md",
+    "30-Architecture/Panes & TTLs.md",
+    "30-Architecture/Settings.md",
+    "30-Architecture/Upload Pipeline.md",
+    "40-Reference/Presigned URL Notes.md",
+    "40-Reference/S3 Multipart Notes.md",
+    "40-Reference/SigV4 Signing.md",
+    "README.md",
+    "10-Assets/Image Prompts.md",
+    "00-Index/EasyUp Overview.md"
+  ]
+}

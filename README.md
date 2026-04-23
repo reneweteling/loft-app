@@ -1,18 +1,32 @@
-# EasyUp
+# Loft
 
-A native macOS menu bar app for uploading files to S3 — drag, drop, get a link.
+Drag a file to your menu bar. Get a link back.
 
-## Features
+![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange?logo=swift) ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue?logo=apple)
 
-- Menu bar popover with four upload panes: Private, 1 Day, 30 Days, Public
-- Drag a file or folder onto a pane to upload; folders are zipped on the fly via `ditto`
-- Files larger than 5 MB use multipart upload automatically (8 MB parts, 4 concurrent)
-- TTL panes enforce expiry via S3 lifecycle rules on object tags (`ttl=1d`, `ttl=30d`)
-- Click a success notification to copy the URL to the clipboard
-- Upload history (last 100 entries) with re-copy, open-in-browser, and remove
-- Custom S3 endpoints: Cloudflare R2, Backblaze B2, MinIO, DigitalOcean Spaces
-- Launch at login toggle in Settings → General
-- Built with Swift 5.9 + SwiftUI, requires no Xcode project — SwiftPM only
+## What it does
+
+- **Drag and drop** a file (or folder) onto the menu bar popover — folders are zipped on the fly
+- **Four TTL panes** — Private, 1 Day, 30 Days, Public — each enforcing expiry via S3 lifecycle tags
+- **Multipart upload** for large files (8 MB parts, 4 concurrent) so big transfers don't stall
+- **Custom S3 endpoints** out of the box: Cloudflare R2, Backblaze B2, MinIO, DigitalOcean Spaces
+
+## Install
+
+```bash
+git clone https://github.com/reneweteling/loft.git
+cd loft
+./scripts/build.sh
+cp -R build/Loft.app /Applications/
+```
+
+First launch: **right-click `Loft.app` → Open** to clear Gatekeeper (required once — the app is ad-hoc signed, not notarized).
+
+## Setup
+
+1. **Create your bucket** — follow [`vault/20-Setup/Bucket Setup.md`](vault/20-Setup/Bucket%20Setup.md) for lifecycle rules and CORS.
+2. **Create an IAM user** with the minimal policy in [`vault/20-Setup/IAM Policy.md`](vault/20-Setup/IAM%20Policy.md).
+3. **Open Loft Settings** (`⌘,`) → **S3 tab** — enter Access Key ID, Secret Access Key, Region, Bucket, and (optionally) a custom endpoint.
 
 ## Requirements
 
@@ -23,101 +37,41 @@ A native macOS menu bar app for uploading files to S3 — drag, drop, get a link
 xcode-select --install
 ```
 
-## Quick Start
-
-```bash
-git clone <repo-url> easyup
-cd easyup
-./scripts/build.sh
-cp -R build/EasyUp.app /Applications/
-```
-
-First launch: right-click `EasyUp.app` in `/Applications/` and choose **Open**. This is required once because the app is ad-hoc signed and not notarized.
-
-## First-Run Setup
-
-1. Click the EasyUp icon in the menu bar. A popover appears with a setup prompt.
-2. Click **Open Settings** (or press `⌘,`).
-3. Go to the **S3** tab.
-4. Enter your **Access Key ID**, **Secret Access Key**, **Region**, and **Bucket** name.
-5. Optionally enter a **Custom endpoint** if you are using an S3-compatible service (see [vault/20-Setup/Custom Endpoints.md](vault/20-Setup/Custom%20Endpoints.md)).
-6. Click **Test Connection** to verify credentials.
-7. Close Settings. The popover now shows the four upload panes.
-
-## Uploading Files
-
-Drag one or more files onto any of the four panes in the popover:
-
-| Pane | Visibility | Expiry |
-|---|---|---|
-| Private | Private (signed URLs not generated) | None |
-| 1 Day | Public | Deleted after 1 day via lifecycle rule |
-| 30 Days | Public | Deleted after 30 days via lifecycle rule |
-| Public | Public | No expiry |
-
-Dropping a **folder** zips its contents with `/usr/bin/ditto` and uploads a single `.zip` archive.
-
-Files over **5 MB** switch automatically to multipart upload (8 MB chunks, 4 concurrent parts).
-
-On success, a system notification appears. **Click the notification** to copy the public URL to the clipboard.
-
-## TTL Lifecycle Rules
-
-The 1 Day and 30 Days panes rely on S3 lifecycle rules that expire objects tagged with `ttl=1d` or `ttl=30d`. These rules are not created automatically — you must configure them once in your bucket.
-
-See `vault/20-Setup/Bucket Setup.md` for the exact AWS CLI one-liners.
-
-## IAM Policy
-
-EasyUp needs a narrow set of S3 permissions: `s3:PutObject`, `s3:DeleteObject`, `s3:GetBucketLocation`, and `s3:ListBucket` scoped to your bucket. It does not need account-wide access. Create a dedicated IAM user with a policy that grants only these actions on the specific bucket ARN and its objects. See `vault/20-Setup/IAM Policy.md` for the exact policy JSON and instructions for creating the user and generating access keys.
-
-## Project Layout
+## Project layout
 
 ```
 Package.swift              SwiftPM manifest
-Sources/EasyUp/            Application source (Swift)
+Sources/Loft/              Application source (Swift 5.9 + SwiftUI)
 scripts/
-  build.sh                 Builds and ad-hoc signs EasyUp.app
+  build.sh                 Builds and ad-hoc signs Loft.app
 build/
-  EasyUp.app               Output of build.sh (git-ignored)
+  Loft.app                 Output of build.sh (git-ignored)
 vault/                     Obsidian vault — setup guides and architecture notes
+docs/                      GitHub Pages site
 ```
 
-## Documentation (vault/)
+## Documentation
 
-The `vault/` folder is an Obsidian vault containing complete setup guides, architecture notes, and reference material. Open it with [Obsidian](https://obsidian.md) for the best reading experience, or read the Markdown files directly.
+The `vault/` folder is an Obsidian vault with complete setup guides and architecture notes. Open it with [Obsidian](https://obsidian.md) or read the Markdown files directly. The GitHub Pages site at [reneweteling.github.io/loft](https://reneweteling.github.io/loft) has a quick-start overview.
 
-Key pages to read first:
+Key pages:
 
-- `vault/20-Setup/Bucket Setup.md` — S3 bucket configuration, lifecycle rules, and CORS
-- `vault/20-Setup/IAM Policy.md` — minimal IAM policy JSON and user setup
-- `vault/20-Setup/Custom Endpoints.md` — connecting to R2, B2, MinIO, and Spaces
+- `vault/20-Setup/Bucket Setup.md` — lifecycle rules and CORS
+- `vault/20-Setup/IAM Policy.md` — minimal IAM policy JSON
 - `vault/10-Architecture/` — design decisions and component overview
 
 ## Troubleshooting
 
-### Gatekeeper "cannot be opened" error
-
-If macOS refuses to open the app after copying it to `/Applications/`, strip the quarantine attribute:
+**Gatekeeper blocks the app** — strip quarantine and reopen:
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/EasyUp.app
+xattr -dr com.apple.quarantine /Applications/Loft.app
 ```
 
-Then double-click the app normally.
+**Test Connection fails** — confirm the region matches the bucket, and that the IAM user has `s3:GetBucketLocation` and `s3:ListBucket` on the bucket ARN (not just objects).
 
-### Test Connection fails
-
-- Double-check the region matches the bucket's actual region.
-- Confirm the IAM user has `s3:GetBucketLocation` and `s3:ListBucket` on the bucket ARN (not just on objects).
-- If using a custom endpoint, make sure the URL includes the scheme (`https://`) and no trailing slash.
-
-### Uploads silently fail or hang
-
-- Check that the bucket policy does not block the IAM user via an explicit Deny.
-- For multipart uploads, the IAM policy also needs `s3:CreateMultipartUpload`, `s3:UploadPart`, `s3:CompleteMultipartUpload`, and `s3:AbortMultipartUpload`. The `vault/20-Setup/IAM Policy.md` policy includes all of these.
+**Uploads fail silently** — for multipart, the policy also needs `s3:CreateMultipartUpload`, `s3:UploadPart`, `s3:CompleteMultipartUpload`, and `s3:AbortMultipartUpload`. The policy template in `vault/20-Setup/IAM Policy.md` covers all of these.
 
 ## License
 
-Personal project — use at your own risk. Not distributed under any OSS license yet.
-# loft-app
+Copyright © 2026 Felobo B.V. All rights reserved.

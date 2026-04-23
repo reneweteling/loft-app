@@ -1,0 +1,8 @@
+{
+  "alwaysUpdateLinks": true,
+  "newLinkFormat": "shortest",
+  "useMarkdownLinks": false,
+  "attachmentFolderPath": "10-Assets/attachments",
+  "defaultViewMode": "source",
+  "livePreview": true
+}
