@@ -1,6 +1,10 @@
-# Loft
+<p align="center">
+  <img src="docs/public/assets/loft-icon.png" alt="Loft app icon" width="128" height="128">
+</p>
 
-Drag a file to your menu bar. Get a link back.
+<h1 align="center">Loft</h1>
+
+<p align="center">Drag a file to your menu bar. Get a link back.</p>
 
 <p align="center">
   <img src="docs/public/assets/ex-menu-open.png" alt="Loft popover with the four drop panes" width="520">

@@ -1,4 +1,6 @@
 ---
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const asset = (path: string) => `${base}${path.replace(/^\//, '')}`;
 const downloadUrl = 'https://github.com/reneweteling/loft-app/releases/latest';
 const githubUrl = 'https://github.com/reneweteling/loft-app';
 ---
@@ -11,6 +13,7 @@ const githubUrl = 'https://github.com/reneweteling/loft-app';
   <div class="band" aria-hidden="true"></div>
 
   <div class="hero-content">
+    <img class="app-icon" src={asset('assets/loft-icon.png')} alt="Loft app icon" width="128" height="128" />
     <div class="eyebrow">macOS menu bar uploader</div>
     <h1 class="wordmark">Loft</h1>
     <p class="tagline">
@@ -99,6 +102,17 @@ const githubUrl = 'https://github.com/reneweteling/loft-app';
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .app-icon {
+    width: clamp(88px, 14vw, 128px);
+    height: auto;
+    margin-bottom: 1.5rem;
+    border-radius: 26px;
+    box-shadow:
+      0 20px 50px -15px rgba(0, 0, 0, 0.55),
+      0 8px 20px -8px rgba(14, 165, 233, 0.35);
+    transform: translateZ(0);
   }
 
   .eyebrow {

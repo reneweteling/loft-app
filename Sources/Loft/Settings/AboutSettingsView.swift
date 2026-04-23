@@ -77,13 +77,22 @@ struct AboutSettingsView: View {
 
     private var loftHeader: some View {
         VStack(spacing: 10) {
-            Image(systemName: "arrow.up.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(
-                    LinearGradient(colors: [Color(hex: "0EA5E9"), Color(hex: "1E3A8A")],
-                                   startPoint: .topLeading,
-                                   endPoint: .bottomTrailing)
-                )
+            if let appIcon = Self.appIcon {
+                Image(nsImage: appIcon)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: 88, height: 88)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+            } else {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(
+                        LinearGradient(colors: [Color(hex: "0EA5E9"), Color(hex: "1E3A8A")],
+                                       startPoint: .topLeading,
+                                       endPoint: .bottomTrailing)
+                    )
+            }
             VStack(spacing: 2) {
                 Text("Loft").font(.title2.weight(.semibold))
                 Text("v\(Self.version)").font(.caption).foregroundStyle(.secondary)
@@ -103,7 +112,7 @@ struct AboutSettingsView: View {
                 .tracking(2)
                 .foregroundStyle(.secondary)
 
-            if let logo = Self.weterlingLogo {
+            if let logo = Self.wetelingLogo {
                 Image(nsImage: logo)
                     .resizable()
                     .renderingMode(.template)
@@ -152,25 +161,62 @@ struct AboutSettingsView: View {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
     }
 
+    static let appIcon: NSImage? = {
+        let icon = NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath)
+        icon.size = NSSize(width: 176, height: 176)
+        return icon
+    }()
+
     static var year: String {
         let f = DateFormatter()
         f.dateFormat = "yyyy"
         return f.string(from: Date())
     }
 
-    static let weterlingLogo: NSImage? = {
+    static let wetelingLogo: NSImage? = {
         guard let url = Bundle.module.url(forResource: "weteling-logo", withExtension: "svg"),
-              let image = NSImage(contentsOf: url) else {
+              let svgImage = NSImage(contentsOf: url) else {
             return nil
         }
-        let intrinsic = image.size
-        if intrinsic.width > 0, intrinsic.height > 0 {
-            let targetHeight: CGFloat = 144
-            let scale = targetHeight / intrinsic.height
-            image.size = NSSize(width: intrinsic.width * scale, height: targetHeight)
+
+        // Rasterize the SVG into a bitmap *once* at load time. If we feed the
+        // SVG-backed NSImage directly to SwiftUI, CoreSVG gets invoked on every
+        // draw pass — and its decode path is not reentrant-safe, which crashes
+        // intermittently inside the ScrollView on the About tab.
+        let intrinsic = svgImage.size
+        let targetHeight: CGFloat = 144
+        let scale = intrinsic.height > 0 ? targetHeight / intrinsic.height : 1
+        let targetSize = NSSize(width: max(intrinsic.width * scale, 1),
+                                height: targetHeight)
+        let pixelScale: CGFloat = 2 // render @2x for Retina
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(targetSize.width * pixelScale),
+            pixelsHigh: Int(targetSize.height * pixelScale),
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 32
+        ) else {
+            return nil
         }
-        image.isTemplate = true
-        return image
+        rep.size = targetSize
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        svgImage.draw(in: NSRect(origin: .zero, size: targetSize),
+                      from: .zero,
+                      operation: .sourceOver,
+                      fraction: 1.0)
+        NSGraphicsContext.restoreGraphicsState()
+
+        let bitmap = NSImage(size: targetSize)
+        bitmap.addRepresentation(rep)
+        bitmap.isTemplate = true
+        return bitmap
     }()
 }
 
