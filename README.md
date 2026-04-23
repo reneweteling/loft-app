@@ -2,6 +2,14 @@
 
 Drag a file to your menu bar. Get a link back.
 
+<p align="center">
+  <img src="docs/public/assets/ex-menu-open.png" alt="Loft popover with the four drop panes" width="520">
+</p>
+
+<p align="center">
+  <a href="docs/public/assets/ex-upload.mp4">▶ Watch a short upload demo (MP4)</a>
+</p>
+
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange?logo=swift) ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue?logo=apple)
 
 ## What it does
@@ -27,6 +35,12 @@ First launch: **right-click `Loft.app` → Open** to clear Gatekeeper (required 
 1. **Create your bucket** — follow [`vault/20-Setup/Bucket Setup.md`](vault/20-Setup/Bucket%20Setup.md) for lifecycle rules and CORS.
 2. **Create an IAM user** with the minimal policy in [`vault/20-Setup/IAM Policy.md`](vault/20-Setup/IAM%20Policy.md).
 3. **Open Loft Settings** (`⌘,`) → **S3 tab** — enter Access Key ID, Secret Access Key, Region, Bucket, and (optionally) a custom endpoint.
+
+### Screenshots
+
+| General | Panes | S3 | About |
+|---|---|---|---|
+| ![General](docs/public/assets/ex-settings-general.png) | ![Panes](docs/public/assets/ex-settings-panes.png) | ![S3](docs/public/assets/ex-settings-s3.png) | ![About](docs/public/assets/ex-settings-about.png) |
 
 ## Requirements
 
