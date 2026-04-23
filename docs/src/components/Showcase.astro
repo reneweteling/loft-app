@@ -1,10 +1,11 @@
 ---
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const asset = (path: string) => `${base}${path.replace(/^\//, '')}`;
 const shots = [
-  { src: `${base}assets/ex-settings-general.png`, label: 'General' },
-  { src: `${base}assets/ex-settings-panes.png`, label: 'Panes' },
-  { src: `${base}assets/ex-settings-s3.png`, label: 'S3' },
-  { src: `${base}assets/ex-settings-about.png`, label: 'About' },
+  { src: asset('assets/ex-settings-general.png'), label: 'General' },
+  { src: asset('assets/ex-settings-panes.png'), label: 'Panes' },
+  { src: asset('assets/ex-settings-s3.png'), label: 'S3' },
+  { src: asset('assets/ex-settings-about.png'), label: 'About' },
 ];
 ---
 
@@ -18,18 +19,18 @@ const shots = [
 
     <figure class="video-wrap">
       <video
-        src={`${base}assets/ex-upload.mp4`}
+        src={asset('assets/ex-upload.mp4')}
         autoplay
         muted
         loop
         playsinline
         preload="metadata"
-        poster={`${base}assets/ex-menu-open.png`}
+        poster={asset('assets/ex-menu-open.png')}
       ></video>
     </figure>
 
     <figure class="hero-shot">
-      <img src={`${base}assets/ex-menu-open.png`} alt="Loft popover with the four drop panes" loading="lazy" />
+      <img src={asset('assets/ex-menu-open.png')} alt="Loft popover with the four drop panes" loading="lazy" />
       <figcaption>The popover. Four panes, each with a different TTL.</figcaption>
     </figure>
 
