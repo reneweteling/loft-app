@@ -174,7 +174,11 @@ struct AboutSettingsView: View {
     }
 
     static let wetelingLogo: NSImage? = {
-        guard let url = Bundle.module.url(forResource: "weteling-logo", withExtension: "svg"),
+        // Bundle.main reads from Loft.app/Contents/Resources where build.sh
+        // drops the SVG — intentionally NOT Bundle.module, since SwiftPM's
+        // executableTarget accessor looks in a sibling .bundle directory
+        // that can't sit at the .app root without breaking code-signing.
+        guard let url = Bundle.main.url(forResource: "weteling-logo", withExtension: "svg"),
               let svgImage = NSImage(contentsOf: url) else {
             return nil
         }
