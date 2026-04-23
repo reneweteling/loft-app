@@ -19,6 +19,12 @@ final class AppConfig: ObservableObject {
         didSet { persistPanes() }
     }
 
+    /// Cached keychain presence. Refreshed off the main thread so SwiftUI
+    /// never blocks on a synchronous SecItemCopyMatching during layout.
+    /// See Sentry issue LOFT-APP-1: reading the keychain inside `body` hung
+    /// the main thread whenever macOS decided to show the access prompt.
+    @Published private(set) var hasKeychainCredentials: Bool = false
+
     private let panesURL: URL = {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let dir = support.appendingPathComponent("Loft", isDirectory: true)
@@ -28,6 +34,14 @@ final class AppConfig: ObservableObject {
 
     private init() {
         loadPanes()
+        refreshKeychainStatus()
+    }
+
+    func refreshKeychainStatus() {
+        Task.detached(priority: .utility) {
+            let present = KeychainStore.hasCredentials()
+            await MainActor.run { self.hasKeychainCredentials = present }
+        }
     }
 
     private func loadPanes() {
@@ -45,6 +59,6 @@ final class AppConfig: ObservableObject {
     }
 
     var isConfigured: Bool {
-        !bucket.isEmpty && KeychainStore.hasCredentials()
+        !bucket.isEmpty && hasKeychainCredentials
     }
 }

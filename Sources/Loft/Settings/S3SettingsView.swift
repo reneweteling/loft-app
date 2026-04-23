@@ -18,12 +18,14 @@ struct S3SettingsView: View {
                     Button("Save to Keychain") {
                         KeychainStore.setAccessKey(accessKey)
                         KeychainStore.setSecretKey(secretKey)
+                        config.refreshKeychainStatus()
                         testResult = "Saved."
                     }
                     Button("Clear") {
                         KeychainStore.clear()
                         accessKey = ""
                         secretKey = ""
+                        config.refreshKeychainStatus()
                         testResult = "Cleared."
                     }
                 }
@@ -75,9 +77,12 @@ struct S3SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear {
-            accessKey = KeychainStore.accessKey() ?? ""
-            secretKey = KeychainStore.secretKey() ?? ""
+        .task {
+            let (ak, sk) = await Task.detached(priority: .userInitiated) {
+                (KeychainStore.accessKey() ?? "", KeychainStore.secretKey() ?? "")
+            }.value
+            accessKey = ak
+            secretKey = sk
         }
     }
 
