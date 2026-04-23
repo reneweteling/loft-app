@@ -53,9 +53,12 @@ Loft is a native macOS agent application (no Dock icon) built on Swift 5.9 + Swi
 └─────────────────────────────────────────────┘
 ```
 
-### Telemetry
+### Telemetry & Analytics
 
-`Telemetry` is a thin wrapper around the Sentry Cocoa SDK. On launch it checks `AppConfig.analyticsEnabled` (opt-out toggle in Settings → General → Privacy) and, if enabled, starts Sentry with crash handling, app-hang tracking, and anonymous session counting. Upload failures are captured with pane/size/stage context — never file names or URLs. See [[Telemetry]] for the full data contract and dashboard links.
+Two complementary stacks, one opt-out toggle (`AppConfig.analyticsEnabled`, surfaced in Settings → General → Privacy):
+
+- **`Telemetry`** wraps the Sentry Cocoa SDK — crashes, app hangs, handled upload errors, anonymous sessions.
+- **`Analytics`** wraps PostHog-iOS — product events (`app.launched`, `upload.*`) with `app_version` / `build_type` super-properties. Neither stack receives file names, URLs, or credentials. See [[Telemetry]] for the full data contract, dashboard links, and how to add new events.
 
 ## Components
 

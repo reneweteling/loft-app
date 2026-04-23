@@ -20,7 +20,7 @@ Native macOS menu bar uploader for S3. Drag a file onto the menu bar icon → th
 - [[Panes & TTLs]]
 - [[Upload Pipeline]]
 - [[Settings]]
-- [[Telemetry]] — Sentry crash reporting & anonymous usage
+- [[Telemetry]] — Sentry crashes + PostHog product analytics, one opt-out toggle
 
 ### Assets
 - [[Image Prompts]] — OpenArt.ai prompts for all icons

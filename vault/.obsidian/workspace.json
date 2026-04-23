@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "10-Assets/Image Prompts.md",
+                "file": "30-Architecture/Telemetry.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Image Prompts"
+              "title": "Telemetry"
             }
           }
         ]
@@ -185,18 +185,19 @@
   },
   "active": "59e38c36ad1315c6",
   "lastOpenFiles": [
+    "30-Architecture/Upload Pipeline.md",
+    "30-Architecture/Telemetry.md",
+    "10-Assets/Image Prompts.md",
     "00-Index/Loft Overview.md",
     "10-Assets/Asset Inventory.md",
     "30-Architecture/File Layout.md",
     "30-Architecture/Architecture Overview.md",
     "30-Architecture/Panes & TTLs.md",
     "30-Architecture/Settings.md",
-    "30-Architecture/Upload Pipeline.md",
     "40-Reference/Presigned URL Notes.md",
     "40-Reference/S3 Multipart Notes.md",
     "40-Reference/SigV4 Signing.md",
     "README.md",
-    "10-Assets/Image Prompts.md",
     "00-Index/EasyUp Overview.md"
   ]
 }
