@@ -1,0 +1,200 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const asset = (path: string) => `${base}${path.replace(/^\//, '')}`;
+---
+
+<section id="security">
+  <div class="section-inner">
+    <p class="section-label">First launch</p>
+    <h2 class="section-heading">Getting past macOS Gatekeeper.</h2>
+
+    <div class="intro">
+      <p>
+        Loft is <strong>ad-hoc signed</strong> with a local certificate, not Apple-notarized.
+        Apple charges €99/year for a Developer ID and this is a tiny personal tool, so we skip
+        that. The tradeoff: on the very first launch macOS will refuse to open the app.
+        One-time, takes 15 seconds.
+      </p>
+    </div>
+
+    <div class="sec-steps">
+      <div class="sec-step">
+        <div class="step-number" aria-hidden="true">1</div>
+        <div class="step-body">
+          <h3>Gatekeeper blocks it</h3>
+          <p>The first time you open Loft, macOS shows this warning. Click <strong>Done</strong>.</p>
+          <figure>
+            <img src={asset('assets/ex-warning.png')} alt="macOS Gatekeeper warning: Loft Not Opened" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <div class="sec-step">
+        <div class="step-number" aria-hidden="true">2</div>
+        <div class="step-body">
+          <h3>Open System Settings</h3>
+          <p>
+            Go to <strong>System Settings → Privacy &amp; Security</strong>. Scroll to the
+            <strong>Security</strong> section — you'll see a line about Loft being blocked, with an
+            <strong>Open Anyway</strong> button.
+          </p>
+          <figure>
+            <img src={asset('assets/ex-settings.png')} alt="System Settings — Privacy & Security — Open Anyway" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+
+      <div class="sec-step">
+        <div class="step-number" aria-hidden="true">3</div>
+        <div class="step-body">
+          <h3>Open Anyway</h3>
+          <p>
+            Click <strong>Open Anyway</strong>, confirm the follow-up prompt, and Loft launches.
+            macOS remembers this choice for this copy of the app — you only do it once per install.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alt">
+      <p class="alt-label">Terminal alternative</p>
+      <p class="alt-desc">Prefer the shell? Strip the quarantine attribute and open it directly:</p>
+      <pre><code>xattr -dr com.apple.quarantine /Applications/Loft.app && open /Applications/Loft.app</code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .intro {
+    margin-bottom: 2.5rem;
+  }
+  .intro p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 680px;
+  }
+  .intro strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .sec-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sec-step {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 2.5rem;
+  }
+
+  .sec-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: 2.5rem;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(14, 165, 233, 0.3), transparent);
+  }
+
+  .sec-step:last-child {
+    padding-bottom: 0;
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--mid-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 4px 16px rgba(14, 165, 233, 0.25);
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body {
+    padding-top: 0.3rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .step-body h3 {
+    font-size: 1.05rem;
+    font-weight: 650;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .step-body p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    max-width: 620px;
+  }
+
+  .step-body strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .step-body figure {
+    margin: 1rem 0 0;
+    max-width: 520px;
+  }
+
+  .step-body img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  .alt {
+    margin-top: 3rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(14, 165, 233, 0.04);
+    border: 1px solid rgba(14, 165, 233, 0.15);
+    border-radius: 12px;
+  }
+  .alt-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal, #0EA5E9);
+    margin: 0 0 0.4rem;
+  }
+  .alt-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0 0.75rem;
+  }
+  .alt pre {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    background: #0b1020;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  .alt code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    color: #d8e2ff;
+    white-space: pre;
+  }
+</style>
