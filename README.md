@@ -72,6 +72,25 @@ xattr -dr com.apple.quarantine /Applications/Loft.app
 
 **Uploads fail silently** — for multipart, the policy also needs `s3:CreateMultipartUpload`, `s3:UploadPart`, `s3:CompleteMultipartUpload`, and `s3:AbortMultipartUpload`. The policy template in `vault/20-Setup/IAM Policy.md` covers all of these.
 
+## Built by
+
+<p align="center">
+  <a href="https://www.weteling.com">
+    <img src="https://www.weteling.com/assets/logo-5480d7e93847ec81ccab93d39d9f98a12af4c37fac5842c19840f02f665605c2.svg" alt="Weteling" height="72">
+  </a>
+</p>
+
+<p align="center">
+  <strong>René Weteling</strong><br>
+  <sub>Felobo B.V. · Tech Lead · Fullstack · Ruby · Elixir · TypeScript</sub>
+</p>
+
+<p align="center">
+  <a href="https://www.weteling.com">weteling.com</a> ·
+  <a href="https://github.com/reneweteling">github.com/reneweteling</a> ·
+  <a href="mailto:rene@weteling.com">rene@weteling.com</a>
+</p>
+
 ## License
 
 Copyright © 2026 Felobo B.V. All rights reserved.

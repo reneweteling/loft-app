@@ -4,63 +4,91 @@ import AppKit
 struct AboutSettingsView: View {
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(
-                        LinearGradient(colors: [Color(hex: "2E7CF6"), Color(hex: "8A3FFC")],
-                                       startPoint: .topLeading,
-                                       endPoint: .bottomTrailing)
-                    )
-                VStack(spacing: 2) {
-                    Text("Loft").font(.title2.weight(.semibold))
-                    Text("v\(Self.version)").font(.caption).foregroundStyle(.secondary)
-                }
-                Text("Native macOS menu bar uploader for S3 and S3-compatible endpoints.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-
+            VStack(spacing: 20) {
+                loftHeader
                 Divider().padding(.horizontal, 40)
-
-                VStack(spacing: 10) {
-                    if let logo = Self.weterlingLogo {
-                        Image(nsImage: logo)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 44)
-                            .colorInvertedIfDark()
-                    }
-                    VStack(spacing: 2) {
-                        Text("René Weteling")
-                            .font(.headline)
-                        Text("Felobo B.V. · Tech Lead & Fullstack Developer")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    HStack(spacing: 18) {
-                        LinkButton(systemImage: "globe", label: "weteling.com",
-                                   url: URL(string: "https://www.weteling.com")!)
-                        LinkButton(systemImage: "chevron.left.slash.chevron.right", label: "reneweteling",
-                                   url: URL(string: "https://github.com/reneweteling")!)
-                        LinkButton(systemImage: "envelope", label: "rene@weteling.com",
-                                   url: URL(string: "mailto:rene@weteling.com")!)
-                    }
-                }
-
-                Divider().padding(.horizontal, 40)
-
+                builtByCard
                 Text("© \(Self.year) Felobo B.V.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
-
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 24)
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity)
         }
+    }
+
+    private var loftHeader: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(
+                    LinearGradient(colors: [Color(hex: "0EA5E9"), Color(hex: "1E3A8A")],
+                                   startPoint: .topLeading,
+                                   endPoint: .bottomTrailing)
+                )
+            VStack(spacing: 2) {
+                Text("Loft").font(.title2.weight(.semibold))
+                Text("v\(Self.version)").font(.caption).foregroundStyle(.secondary)
+            }
+            Text("Native macOS menu bar uploader for S3 and S3-compatible endpoints.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var builtByCard: some View {
+        VStack(spacing: 14) {
+            Text("BUILT BY")
+                .font(.caption2.weight(.semibold))
+                .tracking(2)
+                .foregroundStyle(.secondary)
+
+            if let logo = Self.weterlingLogo {
+                Image(nsImage: logo)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 72)
+                    .colorInvertedIfDark()
+                    .padding(.horizontal, 16)
+            }
+
+            VStack(spacing: 3) {
+                Text("René Weteling")
+                    .font(.title3.weight(.semibold))
+                Text("Felobo B.V.")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Text("Tech Lead · Fullstack · Ruby · Elixir · TypeScript")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
+            HStack(spacing: 10) {
+                PillLinkButton(systemImage: "globe", label: "weteling.com",
+                               url: URL(string: "https://www.weteling.com")!)
+                PillLinkButton(systemImage: "chevron.left.slash.chevron.right", label: "reneweteling",
+                               url: URL(string: "https://github.com/reneweteling")!)
+                PillLinkButton(systemImage: "envelope", label: "Email",
+                               url: URL(string: "mailto:rene@weteling.com")!)
+            }
+            .padding(.top, 2)
+        }
+        .padding(.vertical, 20)
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.secondary.opacity(0.08))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.secondary.opacity(0.18), lineWidth: 0.5)
+        )
+        .padding(.horizontal, 12)
     }
 
     static var version: String {
@@ -101,7 +129,7 @@ private struct DarkInvertModifier: ViewModifier {
     }
 }
 
-private struct LinkButton: View {
+private struct PillLinkButton: View {
     let systemImage: String
     let label: String
     let url: URL
@@ -109,13 +137,22 @@ private struct LinkButton: View {
 
     var body: some View {
         Button(action: { NSWorkspace.shared.open(url) }) {
-            HStack(spacing: 4) {
-                Image(systemName: systemImage).font(.caption)
+            HStack(spacing: 5) {
+                Image(systemName: systemImage).font(.caption2)
                 Text(label).font(.caption)
             }
-            .foregroundStyle(hover ? Color.accentColor : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .foregroundStyle(hover ? Color.white : .primary)
+            .background(
+                Capsule().fill(hover ? Color.accentColor : Color.secondary.opacity(0.14))
+            )
+            .overlay(
+                Capsule().strokeBorder(Color.secondary.opacity(hover ? 0 : 0.22), lineWidth: 0.5)
+            )
         }
         .buttonStyle(.plain)
         .onHover { hover = $0 }
+        .animation(.easeOut(duration: 0.12), value: hover)
     }
 }
