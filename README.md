@@ -6,9 +6,7 @@ Drag a file to your menu bar. Get a link back.
   <img src="docs/public/assets/ex-menu-open.png" alt="Loft popover with the four drop panes" width="520">
 </p>
 
-<p align="center">
-  <a href="docs/public/assets/ex-upload.mp4">▶ Watch a short upload demo (MP4)</a>
-</p>
+https://github.com/reneweteling/loft-app/raw/main/docs/public/assets/ex-upload.mp4
 
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange?logo=swift) ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue?logo=apple)
 
@@ -28,7 +26,25 @@ cd loft
 cp -R build/Loft.app /Applications/
 ```
 
-First launch: **right-click `Loft.app` → Open** to clear Gatekeeper (required once — the app is ad-hoc signed, not notarized).
+First launch: see [First launch (macOS security)](#first-launch-macos-security) below.
+
+## First launch (macOS security)
+
+Loft is **ad-hoc signed** with a local certificate, not Apple-notarized. Apple charges €99/year for a Developer ID and this is a tiny personal tool, so we skip that. The tradeoff: on the very first launch macOS will refuse to open the app and show this:
+
+<p align="center">
+  <img src="docs/public/assets/ex-warning.png" alt="macOS Gatekeeper warning: Loft Not Opened" width="360">
+</p>
+
+Click **Done**, then open **System Settings → Privacy & Security**. Scroll to the **Security** section — you'll see a line about Loft being blocked, with an **Open Anyway** button:
+
+<p align="center">
+  <img src="docs/public/assets/ex-settings.png" alt="System Settings — Privacy & Security — Open Anyway" width="520">
+</p>
+
+Click **Open Anyway**, confirm the follow-up prompt, and Loft launches. macOS remembers this choice for this copy of the app — you only do it once per install.
+
+> **Terminal alternative:** `xattr -dr com.apple.quarantine /Applications/Loft.app && open /Applications/Loft.app` skips the System Settings detour.
 
 ## Setup
 
