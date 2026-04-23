@@ -62,10 +62,27 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          pnpm semantic-release --dry-run --no-ci
+          # semantic-release --dry-run prints either:
+          #   "The next release version is X.Y.Z"         (new release)
+          #   "There are no relevant changes..."           (no release)
+          # It does NOT write package.json (we don't use the @semantic-release/npm plugin),
+          # so we must parse the log instead of reading package.json.
+          set -o pipefail
+          DRY_LOG="$(pnpm semantic-release --dry-run --no-ci 2>&1 | tee /dev/stderr || true)"
 
-          UPDATED_VERSION=$(node -p "require('./package.json').version")
-          echo "version=$UPDATED_VERSION" >> $GITHUB_OUTPUT
+          NEXT_VERSION="$(printf '%s\n' "$DRY_LOG" \
+            | grep -oE 'next release version is [0-9]+\.[0-9]+\.[0-9]+' \
+            | awk '{print $NF}' \
+            | tail -1)"
+
+          if [[ -z "$NEXT_VERSION" ]]; then
+            echo "::warning::semantic-release dry-run did not produce a next version; falling back to latest git tag"
+            LATEST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)"
+            NEXT_VERSION="${LATEST_TAG#v}"
+          fi
+
+          echo "Resolved next version: $NEXT_VERSION"
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
   build:
     name: Build
