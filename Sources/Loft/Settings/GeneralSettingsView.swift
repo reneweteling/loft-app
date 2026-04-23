@@ -27,9 +27,10 @@ struct GeneralSettingsView: View {
                     set: { newValue in
                         config.analyticsEnabled = newValue
                         Telemetry.startIfEnabled()
+                        Analytics.startIfEnabled()
                     }
                 ))
-                Text("Sends crash reports and aggregated usage counts (uploads per pane, file sizes) to Sentry. No file names, URLs, credentials, or personal data are transmitted. Toggle off to disable entirely.")
+                Text("Sends crash reports (Sentry) and aggregated usage counts — uploads per pane, file sizes (PostHog). No file names, URLs, credentials, or personal data are transmitted. Toggle off to disable both.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

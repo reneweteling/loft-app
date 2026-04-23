@@ -16,12 +16,14 @@ final class UploadQueue: ObservableObject {
         for url in fileURLs {
             let item = UploadItem(fileURL: url, paneId: pane.id)
             items.append(item)
-            Telemetry.event("upload.enqueued", data: [
+            let enqueueProps: [String: Any] = [
                 "pane": pane.name,
                 "ttl": pane.ttl.tagValue,
                 "visibility": pane.visibility.rawValue,
                 "sizeBytes": item.fileSize
-            ])
+            ]
+            Telemetry.event("upload.enqueued", data: enqueueProps)
+            Analytics.event("upload.enqueued", properties: enqueueProps)
             let task = Task { await process(item: item, pane: pane) }
             runningTasks[item.id] = task
         }
@@ -75,15 +77,18 @@ final class UploadQueue: ObservableObject {
             }
             HistoryStore.shared.record(item: items.first { $0.id == item.id } ?? item, pane: pane)
             NotificationManager.shared.notifySuccess(url: result.url, fileName: item.fileName)
-            Telemetry.event("upload.succeeded", data: [
+            let successProps: [String: Any] = [
                 "pane": pane.name,
                 "sizeBytes": item.fileSize
-            ])
+            ]
+            Telemetry.event("upload.succeeded", data: successProps)
+            Analytics.event("upload.succeeded", properties: successProps)
             scheduleAutoDismiss(id: item.id)
         } catch is CancellationError {
             // State already set to .cancelled by cancel(id:); just clean up speed.
             update(id: item.id) { $0.speedBytesPerSec = nil }
             Telemetry.event("upload.cancelled", data: ["pane": pane.name])
+            Analytics.event("upload.cancelled", properties: ["pane": pane.name])
         } catch {
             update(id: item.id) {
                 $0.state = .failed(message: error.localizedDescription)
@@ -94,6 +99,11 @@ final class UploadQueue: ObservableObject {
                 "pane": pane.name,
                 "sizeBytes": item.fileSize,
                 "stage": "upload"
+            ])
+            Analytics.event("upload.failed", properties: [
+                "pane": pane.name,
+                "sizeBytes": item.fileSize,
+                "error": String(describing: type(of: error))
             ])
         }
     }

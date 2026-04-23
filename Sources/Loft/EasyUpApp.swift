@@ -32,7 +32,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         Telemetry.startIfEnabled()
+        Analytics.startIfEnabled()
         Telemetry.event("app.launched")
+        Analytics.event("app.launched")
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(windowWillClose(_:)),
