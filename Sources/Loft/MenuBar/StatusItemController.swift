@@ -50,6 +50,19 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] active in self?.updateIcon(active: active) }
             .store(in: &cancellables)
+
+        // A compress prompt needs an answer, so make sure it is on screen even if
+        // the post-drag auto-close timer already fired.
+        uploadQueue.$pendingCompressions
+            .map { !$0.isEmpty }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] waiting in
+                guard let self, waiting else { return }
+                self.dragTimer?.invalidate()
+                if !self.popover.isShown { self.showPopover() }
+            }
+            .store(in: &cancellables)
     }
 
     private func updateIcon(active: Bool) {
@@ -78,7 +91,10 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         dragTimer?.invalidate()
         dragTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { [weak self] _ in
             guard let self else { return }
-            if self.popover.isShown { self.popover.performClose(nil) }
+            MainActor.assumeIsolated {
+                guard self.uploadQueue.pendingCompressions.isEmpty else { return }
+                if self.popover.isShown { self.popover.performClose(nil) }
+            }
         }
     }
 }

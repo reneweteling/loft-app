@@ -124,6 +124,16 @@ struct PopoverView: View {
             }
             .padding(12)
 
+            if !uploadQueue.pendingCompressions.isEmpty {
+                Divider().padding(.horizontal, 12)
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(uploadQueue.pendingCompressions) { pending in
+                        CompressionPromptRow(pending: pending)
+                    }
+                }
+                .padding(12)
+            }
+
             if !uploadQueue.items.isEmpty {
                 Divider().padding(.horizontal, 12)
                 VStack(alignment: .leading, spacing: 6) {
@@ -157,6 +167,73 @@ struct PopoverView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
     }
+}
+
+struct CompressionPromptRow: View {
+    let pending: PendingCompression
+    @EnvironmentObject var uploadQueue: UploadQueue
+    @State private var remember = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "film")
+                .foregroundStyle(Color(hex: "0EA5E9"))
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Text(pending.fileName)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer(minLength: 8)
+                    Text(Self.sizeFormatter.string(fromByteCount: pending.fileSize))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                    Button(action: { uploadQueue.dismissPendingCompression(id: pending.id) }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Skip this file")
+                }
+                Text("Compress to H.265 before uploading?")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Button("Compress") { resolve(compress: true) }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    Button("Upload as is") { resolve(compress: false) }
+                        .controlSize(.small)
+                    Spacer()
+                    Toggle("Remember", isOn: $remember)
+                        .toggleStyle(.checkbox)
+                        .font(.caption2)
+                }
+            }
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(hex: "0EA5E9").opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color(hex: "0EA5E9").opacity(0.45), lineWidth: 1)
+                )
+        )
+    }
+
+    private func resolve(compress: Bool) {
+        uploadQueue.resolvePendingCompression(id: pending.id, compress: compress, remember: remember)
+    }
+
+    private static let sizeFormatter: ByteCountFormatter = {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        f.allowedUnits = [.useMB, .useGB]
+        return f
+    }()
 }
 
 struct UploadRow: View {
@@ -198,8 +275,19 @@ struct UploadRow: View {
                 }
                 ProgressView(value: item.state.progress)
                     .progressViewStyle(.linear)
+                    .tint(isCompressing ? Color(hex: "0EA5E9") : .accentColor)
+                if item.didCompress {
+                    Text("H.265 · \(Self.speedFormatter.string(fromByteCount: item.originalFileSize)) → \(Self.speedFormatter.string(fromByteCount: item.fileSize))")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
+    }
+
+    private var isCompressing: Bool {
+        if case .compressing = item.state { return true }
+        return false
     }
 
     private var iconName: String {
@@ -208,6 +296,7 @@ struct UploadRow: View {
         case .failed: return "exclamationmark.triangle.fill"
         case .cancelled: return "xmark.circle.fill"
         case .uploading: return "arrow.up.circle"
+        case .compressing: return "wand.and.rays"
         case .queued: return "clock"
         }
     }
@@ -217,6 +306,7 @@ struct UploadRow: View {
         case .succeeded: return .green
         case .failed: return .red
         case .cancelled: return .secondary
+        case .compressing: return Color(hex: "0EA5E9")
         default: return .accentColor
         }
     }
@@ -224,6 +314,7 @@ struct UploadRow: View {
     private var statusLabel: String {
         switch item.state {
         case .queued: return "queued"
+        case .compressing(let p): return "encoding \(Int(p * 100))%"
         case .uploading(let p):
             let pct = "\(Int(p * 100))%"
             if let bps = item.speedBytesPerSec, bps > 0 {

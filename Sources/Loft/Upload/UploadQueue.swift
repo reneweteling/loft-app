@@ -1,11 +1,22 @@
 import Foundation
 import SwiftUI
 
+/// A dropped video that crossed the size threshold and is waiting for the user
+/// to answer the compress prompt in the popover.
+struct PendingCompression: Identifiable {
+    let id = UUID()
+    let fileURL: URL
+    let fileName: String
+    let fileSize: Int64
+    let pane: Pane
+}
+
 @MainActor
 final class UploadQueue: ObservableObject {
     static let shared = UploadQueue()
 
     @Published var items: [UploadItem] = []
+    @Published var pendingCompressions: [PendingCompression] = []
     private var runningTasks: [UUID: Task<Void, Never>] = [:]
 
     var isActive: Bool {
@@ -13,20 +24,62 @@ final class UploadQueue: ObservableObject {
     }
 
     func enqueue(fileURLs: [URL], pane: Pane) {
+        let config = AppConfig.shared
         for url in fileURLs {
-            let item = UploadItem(fileURL: url, paneId: pane.id)
-            items.append(item)
-            let enqueueProps: [String: Any] = [
-                "pane": pane.name,
-                "ttl": pane.ttl.tagValue,
-                "visibility": pane.visibility.rawValue,
-                "sizeBytes": item.fileSize
-            ]
-            Telemetry.event("upload.enqueued", data: enqueueProps)
-            Analytics.event("upload.enqueued", properties: enqueueProps)
-            let task = Task { await process(item: item, pane: pane) }
-            runningTasks[item.id] = task
+            let size = VideoCompressor.size(of: url)
+            let route = CompressionRoute.decide(isVideo: VideoCompressor.isVideo(url),
+                                                fileSize: size,
+                                                thresholdMB: config.videoCompressionThresholdMB,
+                                                policy: config.videoCompressionPolicy)
+            switch route {
+            case .ask:
+                pendingCompressions.append(PendingCompression(fileURL: url,
+                                                              fileName: url.lastPathComponent,
+                                                              fileSize: size,
+                                                              pane: pane))
+            case .compress:
+                start(url: url, pane: pane, compress: true)
+            case .asIs:
+                start(url: url, pane: pane, compress: false)
+            }
         }
+    }
+
+    /// Answers one prompt. `remember` writes the choice to settings and applies
+    /// it to every other prompt still on screen, so a batch drop is one click.
+    func resolvePendingCompression(id: UUID, compress: Bool, remember: Bool) {
+        guard let index = pendingCompressions.firstIndex(where: { $0.id == id }) else { return }
+        let pending = pendingCompressions.remove(at: index)
+        var rest: [PendingCompression] = []
+        if remember {
+            AppConfig.shared.videoCompressionPolicy = compress ? .always : .never
+            rest = pendingCompressions
+            pendingCompressions.removeAll()
+        }
+        start(url: pending.fileURL, pane: pending.pane, compress: compress)
+        for other in rest {
+            start(url: other.fileURL, pane: other.pane, compress: compress)
+        }
+    }
+
+    func dismissPendingCompression(id: UUID) {
+        pendingCompressions.removeAll { $0.id == id }
+    }
+
+    private func start(url: URL, pane: Pane, compress: Bool) {
+        let item = UploadItem(fileURL: url, paneId: pane.id)
+        items.append(item)
+        let enqueueProps: [String: Any] = [
+            "pane": pane.name,
+            "ttl": pane.ttl.tagValue,
+            "visibility": pane.visibility.rawValue,
+            "sizeBytes": item.fileSize,
+            "compress": compress
+        ]
+        Telemetry.event("upload.enqueued", data: enqueueProps)
+        Analytics.event("upload.enqueued", properties: enqueueProps)
+        let task = Task { await process(item: item, pane: pane, compress: compress) }
+        runningTasks[item.id] = task
     }
 
     func cancel(id: UUID) {
@@ -38,14 +91,22 @@ final class UploadQueue: ObservableObject {
         }
     }
 
-    private func process(item: UploadItem, pane: Pane) async {
-        update(id: item.id) { $0.state = .uploading(progress: 0.0) }
+    private func process(item: UploadItem, pane: Pane, compress: Bool) async {
+        var item = item
         var lastSample: (date: Date, progress: Double)? = nil
         var smoothedSpeed: Double = 0
 
-        defer { runningTasks.removeValue(forKey: item.id) }
+        defer {
+            runningTasks.removeValue(forKey: item.id)
+            if item.didCompress { VideoCompressor.discard(item.fileURL) }
+        }
 
         do {
+            if compress {
+                try await runCompression(on: &item, pane: pane)
+            }
+
+            update(id: item.id) { $0.state = .uploading(progress: 0.0) }
             let uploader = S3Uploader()
             let fileSize = item.fileSize
             let itemId = item.id
@@ -79,7 +140,8 @@ final class UploadQueue: ObservableObject {
             NotificationManager.shared.notifySuccess(url: result.url, fileName: item.fileName)
             let successProps: [String: Any] = [
                 "pane": pane.name,
-                "sizeBytes": item.fileSize
+                "sizeBytes": item.fileSize,
+                "compressed": item.didCompress
             ]
             Telemetry.event("upload.succeeded", data: successProps)
             Analytics.event("upload.succeeded", properties: successProps)
@@ -103,6 +165,44 @@ final class UploadQueue: ObservableObject {
             Analytics.event("upload.failed", properties: [
                 "pane": pane.name,
                 "sizeBytes": item.fileSize,
+                "error": String(describing: type(of: error))
+            ])
+        }
+    }
+
+    /// Re-encodes to H.265 and points `item` at the result. A file that fails to
+    /// shrink (already H.265, or too short to amortise the container) is dropped
+    /// and the original goes up instead, so this never makes an upload worse.
+    private func runCompression(on item: inout UploadItem, pane: Pane) async throws {
+        update(id: item.id) { $0.state = .compressing(progress: 0.0) }
+        let itemId = item.id
+        let originalSize = item.originalFileSize
+
+        do {
+            let compressed = try await VideoCompressor.compress(source: item.fileURL) { progress in
+                Task { @MainActor in
+                    self.update(id: itemId) { $0.state = .compressing(progress: progress) }
+                }
+            }
+            let newSize = VideoCompressor.size(of: compressed)
+            guard newSize > 0, newSize < originalSize else {
+                VideoCompressor.discard(compressed)
+                Analytics.event("compress.skipped", properties: ["reason": "not_smaller"])
+                return
+            }
+            item.adoptCompressed(compressed, size: newSize)
+            update(id: itemId) { $0.adoptCompressed(compressed, size: newSize) }
+            Analytics.event("compress.succeeded", properties: [
+                "pane": pane.name,
+                "originalBytes": originalSize,
+                "compressedBytes": newSize
+            ])
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            // Compression is an optimisation, never a reason to lose an upload.
+            Telemetry.capture(error, context: ["pane": pane.name, "stage": "compress"])
+            Analytics.event("compress.failed", properties: [
                 "error": String(describing: type(of: error))
             ])
         }

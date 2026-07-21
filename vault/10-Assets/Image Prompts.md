@@ -136,6 +136,35 @@ Not an image, but worth noting: macOS uses the app icon as the notification icon
 
 ---
 
+## 6. Mascot Logo (outline)
+
+> **Destination:** brand mark for icon/website use. Bracket-style prompt reused from an earlier app, adapted to Loft. Generate at 1024x1024 and downscale.
+
+**Prompt:**
+
+```
+[Subject]: Minimalist vector icon glyph, icon only, absolutely no text anywhere. A simple pointed roof gable line with a small hoisting hook at the peak, and a small square parcel hanging on a straight rope below the hook. Just these three elements, nothing else.
+[Action]: The parcel hangs halfway up the rope, being hoisted toward the roof peak.
+[Environment]: none, empty transparent background, no building body, no window, no street, no sky.
+[Cinematography]: Centered composition, square framing, large simple shapes that stay readable when scaled down to 16x16 pixels.
+[Lighting/Style]: Flat monochrome pictogram, single solid black outline, thick uniform stroke weight, style of an SF Symbols glyph or airport signage pictogram.
+[Technical]: High contrast, clean crisp lines, pure black on fully transparent background, scalable, no fills, no detail smaller than one tenth of the canvas.
+```
+
+**Negative prompt:** `text, letters, typography, wordmark, the word Loft, caption, label, color, gradient, shadow, 3D, photorealistic, watermark, background, frame, full building, window, chimney, people, fine detail`
+
+**Notes:**
+- The app name must NEVER appear in the image; models love sneaking the name from the subject line into the artwork, so the name is deliberately left out of the subject description
+- Test readability at 16px and 22px before exporting; if the parcel becomes a blob, drop the rope and hang the parcel directly under the hook
+- For the menu bar template version: pure black #000, export 16/22/44 px, flag as template image in `Contents.json`
+
+**Variations to try:**
+- Gable + hook only, no parcel, as the most stripped-down menu bar glyph
+- Modern penthouse silhouette (flat roof, big window) instead of the canal house gable, for the full-size app icon where more detail survives
+- Filled single-colour silhouette instead of outline
+
+---
+
 ## Export Checklist
 
 - [ ] App icon at all 14 required sizes (macOS `AppIcon.appiconset`)

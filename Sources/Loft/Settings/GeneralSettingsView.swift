@@ -4,6 +4,9 @@ import ServiceManagement
 struct GeneralSettingsView: View {
     @EnvironmentObject var config: AppConfig
     @State private var launchAtLoginStatus: String = ""
+    /// @AppStorage inside an ObservableObject does not publish, so the stepper
+    /// label needs a local mirror to redraw as you click it.
+    @State private var thresholdMB: Int = AppConfig.shared.videoCompressionThresholdMB
 
     var body: some View {
         Form {
@@ -31,6 +34,22 @@ struct GeneralSettingsView: View {
                     }
                 ))
                 Text("Sends crash reports (Sentry) and aggregated usage counts — uploads per pane, file sizes (PostHog). No file names, URLs, credentials, or personal data are transmitted. Toggle off to disable both.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Section("Media") {
+                Picker("Large videos", selection: $config.videoCompressionPolicy) {
+                    ForEach(VideoCompressionPolicy.allCases) { policy in
+                        Text(policy.label).tag(policy)
+                    }
+                }
+                Stepper(value: $thresholdMB, in: 1...2000, step: 5) {
+                    Text("Threshold: \(thresholdMB) MB")
+                }
+                .onChange(of: thresholdMB) { _, newValue in
+                    config.videoCompressionThresholdMB = newValue
+                }
+                Text("Videos above the threshold are re-encoded to H.265 at their original resolution before uploading. Encoding runs on the Apple Silicon media engine via VideoToolbox. If the result is not smaller, the original is uploaded instead.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

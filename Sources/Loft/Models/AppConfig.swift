@@ -14,6 +14,8 @@ final class AppConfig: ObservableObject {
     @AppStorage("general.notificationSound") var notificationSound: Bool = true
     @AppStorage("general.showSystemNotifications") var showSystemNotifications: Bool = false
     @AppStorage("general.analyticsEnabled") var analyticsEnabled: Bool = true
+    @AppStorage("media.videoCompressionPolicy") var videoCompressionPolicy: VideoCompressionPolicy = .ask
+    @AppStorage("media.videoCompressionThresholdMB") var videoCompressionThresholdMB: Int = 10
 
     @Published var panes: [Pane] = Pane.defaults {
         didSet { persistPanes() }
