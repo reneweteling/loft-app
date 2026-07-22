@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "semantic-release": "semantic-release",
-    "prepare": "husky && echo \"pnpm --no -- commitlint --edit $1\" > .husky/commit-msg"
+    "prepare": "husky"
   },
   "release": {
     "branch": "main",
