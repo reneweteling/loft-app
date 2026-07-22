@@ -73,7 +73,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     /// with a small accent dot in the corner while an upload is in flight so the
     /// status item keeps the ambient "busy" signal the SF Symbol fill gave.
     private static func menuBarImage(active: Bool) -> NSImage {
-        let side = max(NSStatusBar.system.thickness - 5, 16)
+        let side = max(NSStatusBar.system.thickness - 2, 20)
         let scale: CGFloat = 2
         guard let rep = NSBitmapImageRep(
             bitmapDataPlanes: nil,
