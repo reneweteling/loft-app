@@ -16,6 +16,7 @@ final class AppConfig: ObservableObject {
     @AppStorage("general.analyticsEnabled") var analyticsEnabled: Bool = true
     @AppStorage("media.videoCompressionPolicy") var videoCompressionPolicy: VideoCompressionPolicy = .ask
     @AppStorage("media.videoCompressionThresholdMB") var videoCompressionThresholdMB: Int = 10
+    @AppStorage("media.videoCompressionQuality") var videoCompressionQuality: VideoCompressionQuality = .balanced
 
     @Published var panes: [Pane] = Pane.defaults {
         didSet { persistPanes() }

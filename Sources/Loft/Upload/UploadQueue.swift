@@ -177,9 +177,11 @@ final class UploadQueue: ObservableObject {
         update(id: item.id) { $0.state = .compressing(progress: 0.0) }
         let itemId = item.id
         let originalSize = item.originalFileSize
+        let bitsPerPixel = AppConfig.shared.videoCompressionQuality.bitsPerPixel
 
         do {
-            let compressed = try await VideoCompressor.compress(source: item.fileURL) { progress in
+            let compressed = try await VideoCompressor.compress(source: item.fileURL,
+                                                                bitsPerPixel: bitsPerPixel) { progress in
                 Task { @MainActor in
                     self.update(id: itemId) { $0.state = .compressing(progress: progress) }
                 }

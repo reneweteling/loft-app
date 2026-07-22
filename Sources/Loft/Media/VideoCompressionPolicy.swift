@@ -17,6 +17,34 @@ enum VideoCompressionPolicy: String, CaseIterable, Identifiable {
     }
 }
 
+/// How hard the H.265 encoder squeezes. Expressed as bits per pixel per frame,
+/// the knob that actually drives HEVC file size at a fixed resolution.
+enum VideoCompressionQuality: String, CaseIterable, Identifiable {
+    case high
+    case balanced
+    case small
+
+    var id: String { rawValue }
+
+    /// Target bits-per-pixel-per-frame. For 1080p30 these land around 7.5 / 5 /
+    /// 3 Mbps, all a large drop from the 20 Mbps+ screen recordings produce.
+    var bitsPerPixel: Double {
+        switch self {
+        case .high: return 0.12
+        case .balanced: return 0.08
+        case .small: return 0.05
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .high: return "High quality"
+        case .balanced: return "Balanced"
+        case .small: return "Smallest file"
+        }
+    }
+}
+
 /// Where a dropped file goes: straight to S3, through the encoder first, or to
 /// a prompt in the popover. Pure so it can be tested without UserDefaults.
 enum CompressionRoute: Equatable {

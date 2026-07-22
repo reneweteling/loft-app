@@ -49,7 +49,14 @@ struct GeneralSettingsView: View {
                 .onChange(of: thresholdMB) { _, newValue in
                     config.videoCompressionThresholdMB = newValue
                 }
-                Text("Videos above the threshold are re-encoded to H.265 at their original resolution before uploading. Encoding runs on the Apple Silicon media engine via VideoToolbox. If the result is not smaller, the original is uploaded instead.")
+                .disabled(config.videoCompressionPolicy == .never)
+                Picker("Quality", selection: $config.videoCompressionQuality) {
+                    ForEach(VideoCompressionQuality.allCases) { quality in
+                        Text(quality.label).tag(quality)
+                    }
+                }
+                .disabled(config.videoCompressionPolicy == .never)
+                Text("Videos above the threshold are re-encoded to H.265 at their original resolution before uploading. Encoding runs on the Apple Silicon media engine via VideoToolbox. Higher quality keeps more detail at a larger size; if the result is not smaller than the original, the original is uploaded instead.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

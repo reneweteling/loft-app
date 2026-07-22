@@ -33,11 +33,6 @@ enum VideoCompressorError: LocalizedError {
 /// media engine via VideoToolbox, the same hardware path HandBrake's "Apple
 /// VideoToolbox" presets use.
 enum VideoCompressor {
-    /// Target bits-per-pixel-per-frame. HEVC stays visually clean around this
-    /// range; 0.08 gives roughly 5 Mbps for 1080p30, a large drop from the
-    /// 20 Mbps+ that screen recordings and phone cameras typically produce.
-    private static let bitsPerPixel = 0.08
-
     /// Extension-based check, deliberately cheap: this runs on the main actor
     /// while a drop is being handled, where loading an AVAsset would stall.
     static func isVideo(_ url: URL) -> Bool {
@@ -48,6 +43,7 @@ enum VideoCompressor {
     /// Returns the compressed file in its own temp directory. The caller owns
     /// that directory and should pass it to ``discard(_:)`` once uploaded.
     static func compress(source: URL,
+                         bitsPerPixel: Double = VideoCompressionQuality.balanced.bitsPerPixel,
                          progress: @escaping @Sendable (Double) -> Void) async throws -> URL {
         let asset = AVURLAsset(url: source)
         guard let videoTrack = try await asset.loadTracks(withMediaType: .video).first else {
