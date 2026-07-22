@@ -30,8 +30,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
     private func configureButton() {
         guard let button = statusItem.button else { return }
-        button.image = NSImage(systemSymbolName: "arrow.up.circle", accessibilityDescription: "Loft")
-        button.image?.isTemplate = true
+        button.image = Self.menuBarImage(active: false)
         button.target = self
         button.action = #selector(togglePopover)
 
@@ -67,9 +66,50 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
     private func updateIcon(active: Bool) {
         guard let button = statusItem.button else { return }
-        let name = active ? "arrow.up.circle.fill" : "arrow.up.circle"
-        button.image = NSImage(systemSymbolName: name, accessibilityDescription: "Loft")
-        button.image?.isTemplate = true
+        button.image = Self.menuBarImage(active: active)
+    }
+
+    /// The blue app icon rendered for the menu bar. Full colour (not a template),
+    /// with a small accent dot in the corner while an upload is in flight so the
+    /// status item keeps the ambient "busy" signal the SF Symbol fill gave.
+    private static func menuBarImage(active: Bool) -> NSImage {
+        let side = max(NSStatusBar.system.thickness - 5, 16)
+        let scale: CGFloat = 2
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(side * scale), pixelsHigh: Int(side * scale),
+            bitsPerSample: 8, samplesPerPixel: 4,
+            hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 32
+        ) else {
+            return NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath)
+        }
+        rep.size = NSSize(width: side, height: side)
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+
+        let appIcon = NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath)
+        appIcon.draw(in: NSRect(x: 0, y: 0, width: side, height: side),
+                     from: .zero, operation: .sourceOver, fraction: 1.0)
+
+        if active {
+            let d = side * 0.38
+            let dot = NSBezierPath(ovalIn: NSRect(x: side - d, y: 0, width: d, height: d)
+                .insetBy(dx: side * 0.03, dy: side * 0.03))
+            NSColor.controlAccentColor.setFill()
+            NSColor.white.setStroke()
+            dot.lineWidth = side * 0.07
+            dot.fill()
+            dot.stroke()
+        }
+
+        NSGraphicsContext.restoreGraphicsState()
+
+        let image = NSImage(size: NSSize(width: side, height: side))
+        image.addRepresentation(rep)
+        image.isTemplate = false
+        return image
     }
 
     @objc private func togglePopover() {
