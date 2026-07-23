@@ -32,13 +32,62 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         guard let button = statusItem.button else { return }
         button.image = Self.menuBarImage(active: false)
         button.target = self
-        button.action = #selector(togglePopover)
+        button.action = #selector(handleClick)
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
 
         let overlay = DragOverlayView(frame: button.bounds) { [weak self] in
             self?.handleDragEnter()
         }
         overlay.autoresizingMask = [.width, .height]
         button.addSubview(overlay)
+
+        // Invisible SwiftUI view that can reach @Environment(\.openWindow), so
+        // the AppKit context menu below can open the settings Window scene.
+        let bridge = NSHostingView(rootView: SettingsOpenerBridge())
+        bridge.frame = .zero
+        button.addSubview(bridge)
+    }
+
+    @objc private func handleClick() {
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            showContextMenu()
+        } else {
+            togglePopover()
+        }
+    }
+
+    private func showContextMenu() {
+        if popover.isShown { popover.performClose(nil) }
+
+        let menu = NSMenu()
+        let about = NSMenuItem(title: "About Loft", action: #selector(openAbout), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
+        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settings.target = self
+        menu.addItem(settings)
+        menu.addItem(.separator())
+        let quit = NSMenuItem(title: "Quit Loft", action: #selector(quit), keyEquivalent: "q")
+        quit.target = self
+        menu.addItem(quit)
+
+        // Assigning the menu and clicking makes the status item track it with
+        // correct highlight behaviour; clearing it restores the click action.
+        statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+        statusItem.menu = nil
+    }
+
+    @objc private func openAbout() {
+        MainActor.assumeIsolated { SettingsRouter.open(tab: .about) }
+    }
+
+    @objc private func openSettings() {
+        MainActor.assumeIsolated { SettingsRouter.open() }
+    }
+
+    @objc private func quit() {
+        NSApp.terminate(nil)
     }
 
     @MainActor
