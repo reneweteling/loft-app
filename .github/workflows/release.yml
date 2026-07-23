@@ -88,6 +88,10 @@ jobs:
     name: Build
     runs-on: macos-latest
     needs: version
+    env:
+      # secrets are not allowed in step-level `if:` expressions, so expose the
+      # presence of the signing cert as an env var instead.
+      HAS_SIGNING: ${{ secrets.MACOS_CERT_P12 != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -100,7 +104,7 @@ jobs:
         run: ./scripts/update-version.sh "${{ needs.version.outputs.version }}"
 
       - name: Import Developer ID certificate
-        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        if: ${{ env.HAS_SIGNING == 'true' }}
         shell: bash
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
@@ -120,7 +124,7 @@ jobs:
       - name: Build Loft.app
         shell: bash
         env:
-          SIGN_IDENTITY: ${{ secrets.MACOS_CERT_P12 != '' && 'Developer ID Application' || '-' }}
+          SIGN_IDENTITY: ${{ env.HAS_SIGNING == 'true' && 'Developer ID Application' || '-' }}
         run: ./scripts/build.sh
 
       - name: Zip app bundle
@@ -130,7 +134,7 @@ jobs:
           echo "Archive size: $(du -sh build/Loft.zip | cut -f1)"
 
       - name: Notarize and staple
-        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        if: ${{ env.HAS_SIGNING == 'true' }}
         shell: bash
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
