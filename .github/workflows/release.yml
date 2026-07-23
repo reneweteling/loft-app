@@ -70,10 +70,12 @@ jobs:
           set -o pipefail
           DRY_LOG="$(pnpm semantic-release --dry-run --no-ci 2>&1 | tee /dev/stderr || true)"
 
+          # `|| true` because grep exits 1 when there is no new release, and
+          # this shell runs with -e -o pipefail; the fallback below handles it.
           NEXT_VERSION="$(printf '%s\n' "$DRY_LOG" \
             | grep -oE 'next release version is [0-9]+\.[0-9]+\.[0-9]+' \
             | awk '{print $NF}' \
-            | tail -1)"
+            | tail -1 || true)"
 
           if [[ -z "$NEXT_VERSION" ]]; then
             echo "::warning::semantic-release dry-run did not produce a next version; falling back to latest git tag"
