@@ -9,6 +9,12 @@ struct S3SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                Text("Loft works with any S3-compatible storage: AWS S3, Cloudflare R2, MinIO, Backblaze B2, DigitalOcean Spaces, Wasabi, Hetzner, Scaleway and more.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Credentials") {
                 TextField("Access Key ID", text: $accessKey)
                     .textFieldStyle(.roundedBorder)
@@ -39,6 +45,9 @@ struct S3SettingsView: View {
                 TextField("Endpoint (optional)", text: $config.endpoint,
                           prompt: Text("https://... — leave blank for AWS S3"))
                     .textFieldStyle(.roundedBorder)
+                Text("Using something other than AWS S3? Enter your provider's endpoint URL here, e.g. https://<account-id>.r2.cloudflarestorage.com for Cloudflare R2 or https://s3.eu-central-1.wasabisys.com for Wasabi.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Toggle("Force path-style URLs (required for MinIO)",
                        isOn: $config.forcePathStyle)
                 if config.bucket.contains(".") {
