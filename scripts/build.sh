@@ -3,7 +3,9 @@ set -euo pipefail
 
 # Loft build script.
 # Builds the SwiftPM executable, wraps it into a .app bundle with Info.plist,
-# and ad-hoc signs it. No Apple Developer ID needed.
+# and signs it. By default this is an ad-hoc signature (local dev builds).
+# Set SIGN_IDENTITY to a "Developer ID Application" identity for release
+# builds; that also enables the hardened runtime, required for notarization.
 
 APP_NAME="Loft"
 BUNDLE_ID="com.weteling.loft"
@@ -58,8 +60,14 @@ fi
 cp "$REPO_ROOT/Sources/Loft/Resources/weteling-logo.svg" "$RES/weteling-logo.svg"
 echo "✓ weteling-logo.svg copied into Contents/Resources"
 
-echo "→ Ad-hoc signing..."
-codesign --force --deep --sign - "$APP_DIR"
+SIGN_IDENTITY="${SIGN_IDENTITY:--}"
+if [[ "$SIGN_IDENTITY" == "-" ]]; then
+    echo "→ Ad-hoc signing..."
+    codesign --force --deep --sign - "$APP_DIR"
+else
+    echo "→ Signing with '$SIGN_IDENTITY' (hardened runtime)..."
+    codesign --force --deep --options runtime --timestamp --sign "$SIGN_IDENTITY" "$APP_DIR"
+fi
 
 echo "→ Removing quarantine flag..."
 xattr -dr com.apple.quarantine "$APP_DIR" 2>/dev/null || true

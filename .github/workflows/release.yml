@@ -99,8 +99,28 @@ jobs:
         shell: bash
         run: ./scripts/update-version.sh "${{ needs.version.outputs.version }}"
 
+      - name: Import Developer ID certificate
+        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        shell: bash
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$MACOS_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -P "$MACOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          rm -f "$RUNNER_TEMP/cert.p12"
+
       - name: Build Loft.app
         shell: bash
+        env:
+          SIGN_IDENTITY: ${{ secrets.MACOS_CERT_P12 != '' && 'Developer ID Application' || '-' }}
         run: ./scripts/build.sh
 
       - name: Zip app bundle
@@ -108,6 +128,24 @@ jobs:
         run: |
           ditto -c -k --sequesterRsrc --keepParent build/Loft.app build/Loft.zip
           echo "Archive size: $(du -sh build/Loft.zip | cut -f1)"
+
+      - name: Notarize and staple
+        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        shell: bash
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ND82KXRD2Q
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          xcrun notarytool submit build/Loft.zip \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --wait
+          xcrun stapler staple build/Loft.app
+          rm build/Loft.zip
+          ditto -c -k --sequesterRsrc --keepParent build/Loft.app build/Loft.zip
+          echo "Notarized archive size: $(du -sh build/Loft.zip | cut -f1)"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
