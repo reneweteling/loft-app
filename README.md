@@ -23,32 +23,18 @@ https://github.com/reneweteling/loft-app/raw/main/docs/public/assets/ex-upload.m
 
 ## Install
 
+Download `Loft.zip` from the [latest release](https://github.com/reneweteling/loft-app/releases/latest), unzip, and drag `Loft.app` to `/Applications`. Releases are signed with an Apple Developer ID and notarized, so macOS opens the app without any Gatekeeper warnings.
+
+Or build from source:
+
 ```bash
-git clone https://github.com/reneweteling/loft.git
-cd loft
+git clone https://github.com/reneweteling/loft-app.git
+cd loft-app
 ./scripts/build.sh
 cp -R build/Loft.app /Applications/
 ```
 
-First launch: see [First launch (macOS security)](#first-launch-macos-security) below.
-
-## First launch (macOS security)
-
-Loft is **ad-hoc signed** with a local certificate, not Apple-notarized. Apple charges €99/year for a Developer ID and this is a tiny personal tool, so we skip that. The tradeoff: on the very first launch macOS will refuse to open the app and show this:
-
-<p align="center">
-  <img src="docs/public/assets/ex-warning.png" alt="macOS Gatekeeper warning: Loft Not Opened" width="360">
-</p>
-
-Click **Done**, then open **System Settings → Privacy & Security**. Scroll to the **Security** section — you'll see a line about Loft being blocked, with an **Open Anyway** button:
-
-<p align="center">
-  <img src="docs/public/assets/ex-settings.png" alt="System Settings — Privacy & Security — Open Anyway" width="520">
-</p>
-
-Click **Open Anyway**, confirm the follow-up prompt, and Loft launches. macOS remembers this choice for this copy of the app — you only do it once per install.
-
-> **Terminal alternative:** `xattr -dr com.apple.quarantine /Applications/Loft.app && open /Applications/Loft.app` skips the System Settings detour.
+Source builds are ad-hoc signed, which is fine for apps built on your own machine.
 
 ## Setup
 
@@ -77,7 +63,7 @@ xcode-select --install
 Package.swift              SwiftPM manifest
 Sources/Loft/              Application source (Swift 5.9 + SwiftUI)
 scripts/
-  build.sh                 Builds and ad-hoc signs Loft.app
+  build.sh                 Builds and signs Loft.app
 build/
   Loft.app                 Output of build.sh (git-ignored)
 vault/                     Obsidian vault — setup guides and architecture notes
@@ -96,7 +82,7 @@ Key pages:
 
 ## Troubleshooting
 
-**Gatekeeper blocks the app** — strip quarantine and reopen:
+**Gatekeeper blocks the app** — releases from v1.6.0 onward are notarized and should open without warnings. If you are on an older download, upgrade to the latest release, or strip quarantine and reopen:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Loft.app
