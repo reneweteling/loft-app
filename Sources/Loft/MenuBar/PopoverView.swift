@@ -6,11 +6,9 @@ struct PopoverView: View {
     @EnvironmentObject var uploadQueue: UploadQueue
     @ObservedObject private var history = HistoryStore.shared
     @ObservedObject private var updates = UpdateChecker.shared
+    @EnvironmentObject var popoverState: PopoverState
     @Environment(\.openWindow) private var openWindow
-    @State private var selectedTab: Tab = .drop
     @State private var updateDismissed: Bool = false
-
-    enum Tab: String, CaseIterable { case drop = "Drop", history = "History" }
 
     private func openSettings() {
         NSApp.setActivationPolicy(.regular)
@@ -38,8 +36,8 @@ struct PopoverView: View {
             Image(systemName: "arrow.up.circle.fill").font(.system(size: 16))
             Text("Loft").font(.headline)
             Spacer()
-            Picker("", selection: $selectedTab) {
-                ForEach(Tab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            Picker("", selection: $popoverState.tab) {
+                ForEach(PopoverState.Tab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
             .frame(width: 160)
@@ -88,7 +86,7 @@ struct PopoverView: View {
         if !config.isConfigured {
             setupPrompt
         } else {
-            switch selectedTab {
+            switch popoverState.tab {
             case .drop: dropGrid
             case .history: HistoryView().environmentObject(config)
             }

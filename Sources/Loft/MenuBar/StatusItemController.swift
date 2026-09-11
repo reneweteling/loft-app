@@ -7,14 +7,16 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private let uploadQueue: UploadQueue
+    private let popoverState: PopoverState
     private var cancellables: Set<AnyCancellable> = []
     private var dragTimer: Timer?
 
     @MainActor
-    init<Content: View>(rootView: Content, uploadQueue: UploadQueue) {
+    init<Content: View>(rootView: Content, uploadQueue: UploadQueue, popoverState: PopoverState) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         self.popover = NSPopover()
         self.uploadQueue = uploadQueue
+        self.popoverState = popoverState
         super.init()
 
         popover.behavior = .transient
@@ -88,6 +90,12 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
     @objc private func quit() {
         NSApp.terminate(nil)
+    }
+
+    /// Every opening starts on the drop grid. A popover left on History would
+    /// otherwise swallow the next drag, because there is nothing to drop on.
+    func popoverDidClose(_ notification: Notification) {
+        MainActor.assumeIsolated { popoverState.showDropGrid() }
     }
 
     @MainActor
@@ -176,6 +184,14 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     }
 
     private func handleDragEnter() {
+        flashPopover()
+    }
+
+    /// Opens on the drop grid and closes again after a few seconds, unless a
+    /// compress prompt is waiting. Used by drag-enter and by Finder Quick
+    /// Actions, so both give the same "Loft picked it up" feedback.
+    func flashPopover() {
+        MainActor.assumeIsolated { popoverState.showDropGrid() }
         if !popover.isShown { showPopover() }
         dragTimer?.invalidate()
         dragTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { [weak self] _ in

@@ -44,10 +44,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let config = AppConfig.shared
         let queue = UploadQueue.shared
+        let popoverState = PopoverState()
         let popoverContent = PopoverView()
             .environmentObject(config)
             .environmentObject(queue)
-        statusController = StatusItemController(rootView: popoverContent, uploadQueue: queue)
+            .environmentObject(popoverState)
+        statusController = StatusItemController(rootView: popoverContent,
+                                                uploadQueue: queue,
+                                                popoverState: popoverState)
         Task { await UpdateChecker.shared.checkIfNeeded() }
     }
 
