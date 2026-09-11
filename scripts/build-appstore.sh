@@ -38,10 +38,12 @@ echo "→ Generating Loft.xcodeproj from project.yml..."
 xcodegen generate --quiet
 
 echo "→ Stamping CFBundleVersion $BUILD_NUMBER..."
-ORIGINAL_BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+# PlistBuddy re-serialises the whole file (tabs, key order), so restore the
+# exact original bytes afterwards rather than setting the value back.
+PLIST_BACKUP="$(mktemp)"
+cp "$PLIST" "$PLIST_BACKUP"
+trap 'cp "$PLIST_BACKUP" "$PLIST"; rm -f "$PLIST_BACKUP"' EXIT
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
-# Leave the tracked plist as we found it, whatever happens below.
-trap '/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $ORIGINAL_BUILD" "$PLIST"' EXIT
 
 echo "→ Archiving (Release, App Store flavour)..."
 rm -rf "$OUT_DIR"
@@ -54,7 +56,7 @@ if ! xcodebuild archive \
     -destination 'generic/platform=macOS' \
     -archivePath "$ARCHIVE" \
     -allowProvisioningUpdates \
-    "${AUTH_ARGS[@]}" > "$LOG" 2>&1; then
+    ${AUTH_ARGS[@]+"${AUTH_ARGS[@]}"} > "$LOG" 2>&1; then
     grep -E "error:|error " "$LOG" | head -20
     echo "✗ Archive failed, full log: $LOG"
     exit 1
@@ -89,7 +91,7 @@ if ! xcodebuild -exportArchive \
     -exportOptionsPlist "$EXPORT_OPTIONS" \
     -exportPath "$OUT_DIR" \
     -allowProvisioningUpdates \
-    "${AUTH_ARGS[@]}" >> "$LOG" 2>&1; then
+    ${AUTH_ARGS[@]+"${AUTH_ARGS[@]}"} >> "$LOG" 2>&1; then
     grep -E "error:|error " "$LOG" | tail -20
     echo "✗ Export failed, full log: $LOG"
     exit 1
