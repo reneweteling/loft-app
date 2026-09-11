@@ -44,6 +44,7 @@ enum VideoCompressor {
     /// that directory and should pass it to ``discard(_:)`` once uploaded.
     static func compress(source: URL,
                          bitsPerPixel: Double = VideoCompressionQuality.balanced.bitsPerPixel,
+                         prioritizeSpeed: Bool = false,
                          progress: @escaping @Sendable (Double) -> Void) async throws -> URL {
         let asset = AVURLAsset(url: source)
         guard let videoTrack = try await asset.loadTracks(withMediaType: .video).first else {
@@ -89,6 +90,7 @@ enum VideoCompressor {
                                 transform: transform,
                                 fps: fps,
                                 bitrate: targetBitrate,
+                                prioritizeSpeed: prioritizeSpeed,
                                 totalSeconds: duration.seconds,
                                 progress: progress)
         } catch {
@@ -109,6 +111,7 @@ enum VideoCompressor {
                                   transform: CGAffineTransform,
                                   fps: Double,
                                   bitrate: Int,
+                                  prioritizeSpeed: Bool,
                                   totalSeconds: Double,
                                   progress: @escaping @Sendable (Double) -> Void) async throws {
         let reader = try AVAssetReader(asset: asset)
@@ -123,18 +126,33 @@ enum VideoCompressor {
         guard reader.canAdd(videoOutput) else { throw VideoCompressorError.readerFailed("cannot read video") }
         reader.add(videoOutput)
 
-        let compression: [String: Any] = [
+        // AVVideoCompressionPropertiesKey passes VideoToolbox keys straight
+        // through to the VTCompressionSession, so the encoder can be tuned
+        // beyond what AVFoundation names itself.
+        var compression: [String: Any] = [
             AVVideoAverageBitRateKey: bitrate,
             AVVideoExpectedSourceFrameRateKey: Int(fps.rounded()),
             AVVideoMaxKeyFrameIntervalDurationKey: 2.0
         ]
+        var encoderSpec: [String: Any] = [
+            kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder as String: true
+        ]
+        if prioritizeSpeed {
+            // No B-frames (no look-ahead reordering) and the encoder's own
+            // speed-first mode. Fail rather than fall back to the software
+            // encoder, which would defeat the point.
+            compression[AVVideoAllowFrameReorderingKey] = false
+            compression[kVTCompressionPropertyKey_PrioritizeEncodingSpeedOverQuality as String] = true
+            encoderSpec[kVTVideoEncoderSpecification_RequireHardwareAcceleratedVideoEncoder as String] = true
+        }
         let videoInput = AVAssetWriterInput(
             mediaType: .video,
             outputSettings: [
                 AVVideoCodecKey: AVVideoCodecType.hevc,
                 AVVideoWidthKey: width,
                 AVVideoHeightKey: height,
-                AVVideoCompressionPropertiesKey: compression
+                AVVideoCompressionPropertiesKey: compression,
+                AVVideoEncoderSpecificationKey: encoderSpec
             ])
         videoInput.expectsMediaDataInRealTime = false
         videoInput.transform = transform

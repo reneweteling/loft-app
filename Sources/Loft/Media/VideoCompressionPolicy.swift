@@ -23,6 +23,9 @@ enum VideoCompressionQuality: String, CaseIterable, Identifiable {
     case high
     case balanced
     case small
+    /// Balanced bitrate, but the encoder skips the slow analysis passes: the
+    /// media engine's quickest path, at the cost of a somewhat larger file.
+    case fast
 
     var id: String { rawValue }
 
@@ -31,9 +34,16 @@ enum VideoCompressionQuality: String, CaseIterable, Identifiable {
     var bitsPerPixel: Double {
         switch self {
         case .high: return 0.12
-        case .balanced: return 0.08
+        case .balanced, .fast: return 0.08
         case .small: return 0.05
         }
+    }
+
+    /// Whether to trade compression efficiency for encode speed: no B-frames,
+    /// speed-over-quality mode, and the hardware encoder is required rather
+    /// than merely preferred.
+    var prioritizeSpeed: Bool {
+        self == .fast
     }
 
     var label: String {
@@ -41,6 +51,7 @@ enum VideoCompressionQuality: String, CaseIterable, Identifiable {
         case .high: return "High quality"
         case .balanced: return "Balanced"
         case .small: return "Smallest file"
+        case .fast: return "Fastest"
         }
     }
 }
