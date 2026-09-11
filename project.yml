@@ -61,18 +61,23 @@ targets:
         product: PostHog
       - package: ZIPFoundation
         product: ZIPFoundation
-    entitlements:
-      path: Loft.entitlements
-    # No `info:` key here on purpose: XcodeGen would *write* a plist at that
-    # path and overwrite the real one. INFOPLIST_FILE points at the tracked
-    # file, which semantic-release stamps with the version.
+    # No `info:` or `entitlements:` keys here on purpose: XcodeGen *writes*
+    # those files and would overwrite the tracked ones. Plain build settings
+    # point at the hand-maintained files instead.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.weteling.loft
         PRODUCT_NAME: Loft
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Sources/Loft/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Loft.entitlements
         ENABLE_HARDENED_RUNTIME: YES
+        # Xcode manages these entitlements through build settings and strips
+        # them from Loft.entitlements when the setting says NO. Keep the file
+        # and these in step.
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+        ENABLE_USER_SELECTED_FILES: readonly
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
         # Reads the Apple Distribution certificate for archives; day-to-day
         # builds in Xcode fall back to the development certificate.

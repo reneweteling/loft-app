@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+    <!-- Mac App Store build only. The GitHub build (scripts/build.sh) runs
+         without a sandbox so it can write Finder Quick Actions to
+         ~/Library/Services.
+
+         Xcode also manages the sandbox, network and user-selected-files keys
+         through ENABLE_* build settings in project.yml; keep both in step. -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <!-- S3, Sentry, PostHog -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- Files dropped on the popover arrive with read access under this. -->
+    <key>com.apple.security.files.user-selected.read-only</key>
+    <true/>
+    <!-- Reserved for a one-time "grant access to your home folder" step,
+         which a future Finder extension will need to read arbitrary paths. -->
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+</dict>
 </plist>
