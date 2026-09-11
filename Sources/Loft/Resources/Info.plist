@@ -34,5 +34,16 @@
     <true/>
     <key>NSSupportsSuddenTermination</key>
     <true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.weteling.loft</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>loft</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

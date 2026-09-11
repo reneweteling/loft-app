@@ -23,15 +23,45 @@ final class UploadQueue: ObservableObject {
         items.contains { !$0.state.isTerminal }
     }
 
-    func enqueue(fileURLs: [URL], pane: Pane) {
+    /// Entry point for anything that arrives as raw paths (a drop, a Finder
+    /// Quick Action): folders are zipped first, paths that vanished are skipped.
+    func enqueue(droppedURLs: [URL], pane: Pane) {
+        var resolved: [URL] = []
+        for url in droppedURLs {
+            var isDir: ObjCBool = false
+            let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+            guard exists else { continue }
+            if isDir.boolValue {
+                do {
+                    let zipped = try FolderZipper.zip(folder: url)
+                    resolved.append(zipped)
+                } catch {
+                    NotificationManager.shared.notifyFailure(
+                        fileName: url.lastPathComponent,
+                        message: "Zip failed: \(error.localizedDescription)"
+                    )
+                }
+            } else {
+                resolved.append(url)
+            }
+        }
+        if !resolved.isEmpty {
+            enqueue(fileURLs: resolved, pane: pane)
+        }
+    }
+
+    private func route(for url: URL) -> CompressionRoute {
         let config = AppConfig.shared
+        return CompressionRoute.decide(isVideo: VideoCompressor.isVideo(url),
+                                       fileSize: VideoCompressor.size(of: url),
+                                       thresholdMB: config.videoCompressionThresholdMB,
+                                       policy: config.videoCompressionPolicy)
+    }
+
+    func enqueue(fileURLs: [URL], pane: Pane) {
         for url in fileURLs {
             let size = VideoCompressor.size(of: url)
-            let route = CompressionRoute.decide(isVideo: VideoCompressor.isVideo(url),
-                                                fileSize: size,
-                                                thresholdMB: config.videoCompressionThresholdMB,
-                                                policy: config.videoCompressionPolicy)
-            switch route {
+            switch route(for: url) {
             case .ask:
                 pendingCompressions.append(PendingCompression(fileURL: url,
                                                               fileName: url.lastPathComponent,

@@ -63,36 +63,10 @@ struct DropPaneView: View {
 
         group.notify(queue: .main) {
             Task { @MainActor in
-                await enqueue(urls: fileURLs)
+                uploadQueue.enqueue(droppedURLs: fileURLs, pane: pane)
             }
         }
         return true
-    }
-
-    @MainActor
-    private func enqueue(urls: [URL]) async {
-        var resolved: [URL] = []
-        for url in urls {
-            var isDir: ObjCBool = false
-            let exists = FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
-            guard exists else { continue }
-            if isDir.boolValue {
-                do {
-                    let zipped = try FolderZipper.zip(folder: url)
-                    resolved.append(zipped)
-                } catch {
-                    NotificationManager.shared.notifyFailure(
-                        fileName: url.lastPathComponent,
-                        message: "Zip failed: \(error.localizedDescription)"
-                    )
-                }
-            } else {
-                resolved.append(url)
-            }
-        }
-        if !resolved.isEmpty {
-            uploadQueue.enqueue(fileURLs: resolved, pane: pane)
-        }
     }
 }
 

@@ -17,6 +17,7 @@ https://github.com/reneweteling/loft-app/raw/main/docs/public/assets/ex-upload.m
 ## What it does
 
 - **Drag and drop** a file (or folder) onto the menu bar popover — folders are zipped on the fly
+- **Right-click in Finder**, then Quick Actions, then "Upload to Loft (1 Day)". One entry per pane, kept in sync with your pane settings
 - **Four TTL panes** — Private, 1 Day, 30 Days, Public — each enforcing expiry via S3 lifecycle tags
 - **Multipart upload** for large files (8 MB parts, 4 concurrent) so big transfers don't stall
 - **Custom S3 endpoints** out of the box: Cloudflare R2, Backblaze B2, MinIO, DigitalOcean Spaces
@@ -87,6 +88,8 @@ Key pages:
 ```bash
 xattr -dr com.apple.quarantine /Applications/Loft.app
 ```
+
+**No "Upload to Loft" entries under Quick Actions.** Loft writes one `.workflow` per enabled pane to `~/Library/Services` on launch and whenever you edit panes (Settings → General → Finder toggles this). If Finder still does not list them, check System Settings → General → Login Items & Extensions → Finder, where Quick Actions can be switched off per item. Removing Loft leaves the workflows behind; turn the toggle off before uninstalling, or delete them from `~/Library/Services` by hand.
 
 **Test Connection fails** — confirm the region matches the bucket, and that the IAM user has `s3:GetBucketLocation` and `s3:ListBucket` on the bucket ARN (not just objects).
 

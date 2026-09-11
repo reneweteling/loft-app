@@ -24,6 +24,18 @@ struct GeneralSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Section("Finder") {
+                Toggle("Add panes to Finder's Quick Actions menu", isOn: Binding(
+                    get: { config.finderQuickActions },
+                    set: { newValue in
+                        config.finderQuickActions = newValue
+                        FinderQuickActions.sync(panes: newValue ? config.panes : [])
+                    }
+                ))
+                Text("Right-click a file or folder in Finder → Quick Actions → \"Upload to Loft (…)\". One entry per enabled pane, kept in sync with the Panes tab. Turn off to remove them from ~/Library/Services.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Section("Privacy") {
                 Toggle("Share anonymous crash reports and usage", isOn: Binding(
                     get: { config.analyticsEnabled },

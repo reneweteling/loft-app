@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Combine
 
 @main
 struct LoftApp: App {
@@ -24,6 +25,7 @@ struct LoftApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusController: StatusItemController?
+    private var cancellables: Set<AnyCancellable> = []
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
@@ -52,7 +54,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusController = StatusItemController(rootView: popoverContent,
                                                 uploadQueue: queue,
                                                 popoverState: popoverState)
+        syncFinderQuickActions()
+        // The Panes tab edits names live, so wait for typing to settle.
+        config.$panes
+            .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in self?.syncFinderQuickActions() }
+            .store(in: &cancellables)
         Task { await UpdateChecker.shared.checkIfNeeded() }
+    }
+
+    /// Finder Quick Actions arrive here as `loft://upload?pane=…&f=…` (see
+    /// `UploadURL`). Also the launch path when Loft was not running yet.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            guard let request = UploadURL.parse(url) else { continue }
+            handleUploadRequest(request)
+        }
+    }
+
+    private func handleUploadRequest(_ request: UploadURL.Request) {
+        MainActor.assumeIsolated {
+            let config = AppConfig.shared
+            guard let pane = config.panes.first(where: { $0.id == request.paneID && $0.enabled }) else {
+                // The workflow outlived its pane; rebuild the menu and tell the user.
+                syncFinderQuickActions()
+                NotificationManager.shared.notifyFailure(
+                    fileName: request.files.first?.lastPathComponent ?? "Upload",
+                    message: "That Loft pane no longer exists. Right-click again to see the current panes."
+                )
+                return
+            }
+            Analytics.event("quickaction.invoked", properties: ["pane": pane.name, "count": request.files.count])
+            statusController?.flashPopover()
+            UploadQueue.shared.enqueue(droppedURLs: request.files, pane: pane)
+        }
+    }
+
+    private func syncFinderQuickActions() {
+        MainActor.assumeIsolated {
+            let config = AppConfig.shared
+            FinderQuickActions.sync(panes: config.finderQuickActions ? config.panes : [])
+        }
     }
 
     @objc private func windowWillClose(_ note: Notification) {

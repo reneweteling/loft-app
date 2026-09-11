@@ -50,6 +50,7 @@ Breadcrumbs ride along with crash/error events — they never turn into standalo
 | `upload.succeeded` | `pane`, `sizeBytes` | Upload completes OK |
 | `upload.cancelled` | `pane` | User hits × during upload |
 | `upload.failed` | `pane`, `sizeBytes`, `error` (Swift error type name) | Upload errors |
+| `quickaction.invoked` | `pane`, `count` | Files arrived through a Finder Quick Action (`loft://upload`) |
 
 `app_version` and `build_type` (`debug`/`release`) are registered as super-properties so every event carries them automatically.
 
