@@ -101,6 +101,7 @@ Two complementary stacks, one opt-out toggle (`AppConfig.analyticsEnabled`, surf
 
 ## Related
 
+- [[App Store]]
 - [[Finder Quick Actions]]
 - [[Panes & TTLs]]
 - [[Upload Pipeline]]

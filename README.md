@@ -61,15 +61,20 @@ xcode-select --install
 ## Project layout
 
 ```
-Package.swift              SwiftPM manifest
+Package.swift              SwiftPM manifest (GitHub build)
+project.yml                XcodeGen spec (Mac App Store build, sandboxed)
+Loft.entitlements          App Sandbox entitlements for the store build
 Sources/Loft/              Application source (Swift 5.9 + SwiftUI)
 scripts/
-  build.sh                 Builds and signs Loft.app
+  build.sh                 Builds and signs Loft.app for GitHub releases
+  build-appstore.sh        Archives and exports the App Store package
 build/
   Loft.app                 Output of build.sh (git-ignored)
 vault/                     Obsidian vault — setup guides and architecture notes
 docs/                      GitHub Pages site
 ```
+
+The two builds share one codebase; `Sources/Loft/Distribution.swift` holds the few differences (updates, Finder integration, About tab). See `vault/50-Distribution/App Store.md`.
 
 ## Documentation
 

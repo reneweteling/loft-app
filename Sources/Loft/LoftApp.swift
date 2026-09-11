@@ -94,6 +94,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func syncFinderQuickActions() {
+        guard Distribution.current.installsFinderQuickActions else { return }
         MainActor.assumeIsolated {
             let config = AppConfig.shared
             FinderQuickActions.sync(panes: config.finderQuickActions ? config.panes : [])

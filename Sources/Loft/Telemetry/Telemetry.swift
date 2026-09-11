@@ -29,6 +29,7 @@ enum Telemetry {
             SentrySDK.configureScope { scope in
                 scope.setTag(value: Self.appVersion, key: "app.version")
                 scope.setTag(value: Self.environment, key: "build.type")
+                scope.setTag(value: Distribution.current.analyticsValue, key: "channel")
             }
             started = true
         } else if started {

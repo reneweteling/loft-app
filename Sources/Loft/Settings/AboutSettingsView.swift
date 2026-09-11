@@ -8,7 +8,12 @@ struct AboutSettingsView: View {
         ScrollView {
             VStack(spacing: 20) {
                 loftHeader
-                updatesRow
+                if Distribution.current.checksGitHubForUpdates {
+                    updatesRow
+                } else {
+                    storeRow
+                }
+                feedbackRow
                 Divider().padding(.horizontal, 40)
                 builtByCard
                 Text("© \(Self.year) Felobo B.V.")
@@ -23,6 +28,33 @@ struct AboutSettingsView: View {
         .task {
             await updates.checkIfNeeded()
         }
+    }
+
+    /// The store copy: no polling, no download link. Updates come from the
+    /// App Store, and the rating link only exists once the app record does.
+    private var storeRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.seal.fill")
+                .foregroundStyle(.green)
+            Text("Updates arrive through the App Store")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if let rate = Distribution.rateURL() {
+                Button("Rate Loft") { NSWorkspace.shared.open(rate) }
+                    .controlSize(.small)
+            }
+        }
+    }
+
+    private var feedbackRow: some View {
+        Button {
+            NSWorkspace.shared.open(Distribution.bugReportURL())
+        } label: {
+            Label("Report a problem or suggest something", systemImage: "ladybug")
+                .font(.caption)
+        }
+        .buttonStyle(.link)
+        .help("Opens a GitHub issue with your version and macOS release filled in")
     }
 
     private var updatesRow: some View {
@@ -95,7 +127,7 @@ struct AboutSettingsView: View {
             }
             VStack(spacing: 2) {
                 Text("Loft").font(.title2.weight(.semibold))
-                Text("v\(Self.version)").font(.caption).foregroundStyle(.secondary)
+                Text("v\(Self.version) · \(Distribution.current.label)").font(.caption).foregroundStyle(.secondary)
             }
             Text("Native macOS menu bar uploader for S3 and S3-compatible endpoints.")
                 .font(.footnote)

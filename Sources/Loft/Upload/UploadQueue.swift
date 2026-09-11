@@ -168,6 +168,7 @@ final class UploadQueue: ObservableObject {
             }
             HistoryStore.shared.record(item: items.first { $0.id == item.id } ?? item, pane: pane)
             NotificationManager.shared.notifySuccess(url: result.url, fileName: item.fileName)
+            ReviewPrompt.recordSuccessfulUpload()
             let successProps: [String: Any] = [
                 "pane": pane.name,
                 "sizeBytes": item.fileSize,

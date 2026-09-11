@@ -30,7 +30,8 @@ enum Analytics {
             PostHogSDK.shared.setup(config)
             PostHogSDK.shared.register([
                 "app_version": appVersion,
-                "build_type": buildType
+                "build_type": buildType,
+                "channel": Distribution.current.analyticsValue
             ])
             started = true
         } else if started {

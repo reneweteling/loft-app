@@ -39,6 +39,7 @@ final class UpdateChecker: ObservableObject {
     }
 
     func checkIfNeeded() async {
+        guard Distribution.current.checksGitHubForUpdates else { return }
         if !checkedThisProcess {
             await performCheck()
             return
@@ -50,6 +51,7 @@ final class UpdateChecker: ObservableObject {
     }
 
     func forceCheck() async {
+        guard Distribution.current.checksGitHubForUpdates else { return }
         await performCheck()
     }
 
