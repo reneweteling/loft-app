@@ -61,6 +61,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in self?.syncFinderQuickActions() }
             .store(in: &cancellables)
+        // Re-check on every launch: the opt-in survives, the prompt only runs once.
+        Task { await NotificationManager.shared.requestAuthorizationIfOptedIn() }
         Task { await UpdateChecker.shared.checkIfNeeded() }
     }
 

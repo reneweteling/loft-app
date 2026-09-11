@@ -224,6 +224,9 @@ final class UploadQueue: ObservableObject {
             }
             item.adoptCompressed(compressed, size: newSize)
             update(id: itemId) { $0.adoptCompressed(compressed, size: newSize) }
+            NotificationManager.shared.notifyCompressed(fileName: item.fileName,
+                                                        originalSize: originalSize,
+                                                        compressedSize: newSize)
             Analytics.event("compress.succeeded", properties: [
                 "pane": pane.name,
                 "originalBytes": originalSize,

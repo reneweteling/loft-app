@@ -33,6 +33,16 @@ final class NotificationManager: NSObject {
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
 
+    func notifyCompressed(fileName: String, originalSize: Int64, compressedSize: Int64) {
+        guard AppConfig.shared.showSystemNotifications else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "Compression complete, uploading now"
+        content.body = "\(fileName)\n\(Self.sizeFormatter.string(fromByteCount: originalSize)) → \(Self.sizeFormatter.string(fromByteCount: compressedSize))"
+        if AppConfig.shared.notificationSound { content.sound = .default }
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    }
+
     func notifyFailure(fileName: String, message: String) {
         guard AppConfig.shared.showSystemNotifications else { return }
         let content = UNMutableNotificationContent()
@@ -42,6 +52,13 @@ final class NotificationManager: NSObject {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
+
+    private static let sizeFormatter: ByteCountFormatter = {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        f.allowedUnits = [.useKB, .useMB, .useGB]
+        return f
+    }()
 
     func copyToClipboard(url: URL) {
         let pb = NSPasteboard.general
