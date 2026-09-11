@@ -2,11 +2,20 @@
 const features = [
   {
     title: 'Drag & Drop',
-    desc: 'Drop any file or folder onto the menu bar popover, or right-click it in Finder and pick a pane under Quick Actions. Folders are zipped automatically before upload.',
+    desc: 'Drop any file or folder onto the menu bar popover. Folders are zipped automatically before upload.',
     icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M11 2v12m0 0l-4-4m4 4 4-4"/>
       <path d="M3 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+    </svg>`,
+  },
+  {
+    title: 'Right-click in Finder',
+    desc: 'Select files, open Quick Actions, pick a pane. One "Upload to Loft" entry per pane, kept in sync with your settings. No drag needed.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="16" height="16" rx="3"/>
+      <path d="M7 8h8M7 11.5h8M7 15h5"/>
     </svg>`,
   },
   {
@@ -24,6 +33,15 @@ const features = [
     icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M13 2L3 13h8l-2 7 10-11h-8l2-7z"/>
+    </svg>`,
+  },
+  {
+    title: 'H.265 Video Compression',
+    desc: 'Large screen recordings are re-encoded on the Apple Silicon media engine before upload. Pick High quality, Balanced, Smallest file, or Fastest.',
+    icon: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="2.5" y="5" width="12" height="12" rx="2"/>
+      <path d="M14.5 9.5l5-2.5v8l-5-2.5"/>
     </svg>`,
   },
   {
@@ -57,7 +75,7 @@ const features = [
 <style>
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.25rem;
   }
 
