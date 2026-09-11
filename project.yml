@@ -63,8 +63,9 @@ targets:
         product: ZIPFoundation
     entitlements:
       path: Loft.entitlements
-    info:
-      path: Sources/Loft/Resources/Info.plist
+    # No `info:` key here on purpose: XcodeGen would *write* a plist at that
+    # path and overwrite the real one. INFOPLIST_FILE points at the tracked
+    # file, which semantic-release stamps with the version.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.weteling.loft
@@ -72,7 +73,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: Sources/Loft/Resources/Info.plist
         ENABLE_HARDENED_RUNTIME: YES
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS: APP_STORE
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
         # Reads the Apple Distribution certificate for archives; day-to-day
         # builds in Xcode fall back to the development certificate.
         CODE_SIGN_IDENTITY: "Apple Development"
@@ -94,4 +95,4 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.weteling.loft.tests
         GENERATE_INFOPLIST_FILE: YES
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS: APP_STORE
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
