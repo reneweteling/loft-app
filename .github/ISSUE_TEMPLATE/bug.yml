@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in Loft does not work as it should
+labels: [bug]
+body:
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Which Loft do you run?
+      options:
+        - Mac App Store
+        - GitHub release
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Loft version
+      description: Settings, About tab
+      placeholder: "1.7.0"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "15.1"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: storage
+    attributes:
+      label: Storage setup
+      description: AWS S3, Cloudflare R2, Backblaze B2, MinIO, other. Never paste keys.

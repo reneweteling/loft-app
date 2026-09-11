@@ -116,4 +116,8 @@ xattr -dr com.apple.quarantine /Applications/Loft.app
 
 ## License
 
-Copyright © 2026 Felobo B.V. All rights reserved.
+Loft is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). In short: read the code, build it, use it for anything noncommercial. Selling it, shipping it inside a product, or using it in a business is not covered; the Mac App Store edition is the licensed copy for that.
+
+Pull requests are not accepted, issues and ideas are. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Copyright © 2026 Felobo B.V.
